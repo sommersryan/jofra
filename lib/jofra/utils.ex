@@ -32,6 +32,29 @@ defmodule Jofra.Utils do
     end
   end
 
+  def test_context do
+    %{
+      controller: :batsman,
+      batsman: %{
+        tendency: :moderate,
+        shot_selection: :a,
+        shot_quality: :a,
+        shot_precision: :b,
+        batting_endurance: :b
+      },
+      bowler: %{
+        type: :spin,
+        line: :c,
+        length: :b,
+        spin: :a,
+        swing: :c,
+        seam: :f
+      },
+      outcome: :dot,
+      ball_age: 52
+    }
+  end
+
   def test_sides do
     {
       [
