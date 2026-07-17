@@ -15,11 +15,17 @@ defmodule Jofra.Charts do
     :seam
   ] end
 
-  def apply_charts(%{ controller: controller } = context) do
+  def apply_charts(%{ controller: controller, outcome: outcome } = context) do
     controller
     |> charts_for
-    |> Enum.map(fn chart -> get_chart(chart, context) end)
-
+    |> Enum.reduce([outcome], fn current_chart, acc ->
+         [ curr | _ ] = acc
+         chart_to_use = get_chart(current_chart, Map.put(context, :outcome, curr))
+         IO.inspect(current_chart)
+         IO.inspect(chart_to_use)
+         [ roll_on_chart(curr, chart_to_use) | acc ]
+       end)
+    |> hd()
   end
 
   def get_chart(chart, %{
@@ -29,69 +35,66 @@ defmodule Jofra.Charts do
     player_rating = Map.get(context, controller) |> Map.get(chart)
 
     chart(chart, context)
-    |> Enum.filter(fn { rating, _, _, _, _ } -> rating == player_rating end)
-    |> Enum.filter(fn { _, chart_outcome, _, _, _ } -> chart_outcome == outcome end)
+    |> Enum.filter(fn { rating, _, _, _ } -> rating == player_rating end)
+    |> Enum.filter(fn { _, chart_outcome, _, _ } -> chart_outcome == outcome end)
   end
 
-  def roll_on_chart(outcome_chart) do
-    outcome_chart
-    |> build_chance_list
-    |> Enum.random
-  end
+  def roll_on_chart(outcome, outcome_chart) do
+    roll = :rand.uniform()
 
-  def build_chance_list(charts) do
-    denom =
-      Enum.map(charts, fn { _, _, _, num, den } -> Ratio.new(num, den) end)
-      |> Enum.reduce(fn x, acc -> Ratio.add(acc, x) end)
-      |> Ratio.denominator
-      |> IO.inspect
+    result = Enum.reduce_while(outcome_chart, 0.0, fn { _, _, event, prob }, acc_prob ->
+        next_boundary = acc_prob + prob
 
-    chance_list = charts
-      |> Enum.map(fn {_, _, to, chance, out_of } -> { to, chance * (denom / out_of) } end)
-      |> Enum.reduce([], fn { el, n }, acc -> acc ++ List.duplicate(el, trunc(n)) end)
+        cond do
+          roll < next_boundary -> { :halt, { :selected, event } }
+          true -> { :cont, next_boundary }
+        end
+      end
+    )
 
-    original = charts |> Enum.at(0) |> elem(1)
-
-    chance_list ++ List.duplicate(original, denom - Enum.count(chance_list))
+    case result do
+      { :selected, new_outcome } -> new_outcome
+      _acc -> outcome
+    end
   end
 
   def chart(:shot_quality, _) do [
     # better quality - ones and twos become fours
-    { :a, :single, :four, 1, 20 },
-    { :a, :double, :four, 1, 15 },
-    { :b, :single, :four, 1, 40 },
-    { :b, :double, :four, 1, 25 },
-    { :d, :four, :double, 1, 25 },
-    { :d, :four, :single, 1, 40 },
-    { :f, :four, :double, 1, 15 },
-    { :f, :four, :single, 1, 20 }
+    { :a, :single, :four, 1/20 },
+    { :a, :double, :four, 1/5 },
+    { :b, :single, :four, 1/40 },
+    { :b, :double, :four, 1/25 },
+    { :d, :four, :double, 1/25 },
+    { :d, :four, :single, 1/40 },
+    { :f, :four, :double, 1/15 },
+    { :f, :four, :single, 1/20 }
    ]
   end
 
   def chart(:shot_selection, _) do [
     # better selection - wickets become dots
-      { :a, :wicket, :dot, 1, 10 },
-      { :b, :wicket, :dot, 1, 15 },
-      { :d, :dot, :wicket, 1, 30 },
-      { :f, :dot, :wicket, 1, 20 }
+      { :a, :wicket, :dot, 1/10 },
+      { :b, :wicket, :dot, 1/15 },
+      { :d, :dot, :wicket, 1/30 },
+      { :f, :dot, :wicket, 1/20 }
     ]
   end
 
   def chart(:shot_precision, _) do
     [
     # better precision - dots become singles, doubles, boundaries
-      { :a, :dot, :single, 1, 10 },
-      { :a, :dot, :double, 1, 20 },
-      { :a, :dot, :four, 1, 50 },
-      { :b, :dot, :single, 1, 20 },
-      { :b, :dot, :double, 1, 30 },
-      { :b, :dot, :four, 1, 70 },
-      { :d, :four, :dot, 1, 20 },
-      { :d, :double, :dot, 1, 30 },
-      { :d, :single, :dot, 1, 70 },
-      { :f, :four, :dot, 1, 10 },
-      { :f, :double, :dot, 1, 20 },
-      { :f, :single, :dot, 1, 50 }
+      { :a, :dot, :single, 1/10 },
+      { :a, :dot, :double, 1/20 },
+      { :a, :dot, :four, 1/50 },
+      { :b, :dot, :single, 1/20 },
+      { :b, :dot, :double, 1/30 },
+      { :b, :dot, :four, 1/70 },
+      { :d, :four, :dot, 1/20 },
+      { :d, :double, :dot, 1/30 },
+      { :d, :single, :dot, 1/70 },
+      { :f, :four, :dot, 1/10 },
+      { :f, :double, :dot, 1/20 },
+      { :f, :single, :dot, 1/50 }
     ]
   end
 
@@ -100,17 +103,17 @@ defmodule Jofra.Charts do
     # conservative - singles become dots, wickets become dots
     # moderate - no change
     # aggressive - singles become fours, dots become wickets
-    { :conservative, :single, :dot, 1, 20 },
-    { :conservative, :wicket, :dot, 1, 10 },
-    { :aggressive, :single, :four, 1, 10 },
-    { :aggressive, :dot, :wicket, 1, 30 }
+    { :conservative, :single, :dot, 1/20 },
+    { :conservative, :wicket, :dot, 1/10 },
+    { :aggressive, :single, :four, 1/10 },
+    { :aggressive, :dot, :wicket, 1/30 }
   ]
   end
 
   def chart(:batting_endurance, %{ day: day }) when day > 3 do
     [# with lower endurance, dots become wickets late in match
-      { :d, :dot, :wicket, 1,  30 },
-      { :f, :dot, :wicket, 1, 15}
+      { :d, :dot, :wicket, 1/30 },
+      { :f, :dot, :wicket, 1/15 }
     ]
   end
 
@@ -127,10 +130,10 @@ defmodule Jofra.Charts do
   def chart(:length, _) do
     # better length - dots become wickets
     [
-      { :a, :dot, :wicket, 1, 30 },
-      { :b, :dot, :wicket, 1, 15 },
-      { :d, :wicket, :dot, 1, 30 },
-      { :f, :wicket, :dot, 1, 15 }
+      { :a, :dot, :wicket, 1/30 },
+      { :b, :dot, :wicket, 1/15 },
+      { :d, :wicket, :dot, 1/30 },
+      { :f, :wicket, :dot, 1/15 }
     ]
   end
 
@@ -138,10 +141,10 @@ defmodule Jofra.Charts do
     # for spin bowlers, better spin makes dots become wickets
     # for older balls
     [
-      { :a, :dot, :wicket, 1, 30 },
-      { :b, :dot, :wicket, 1, 15 },
-      { :d, :wicket, :dot, 1, 30 },
-      { :f, :wicket, :dot, 1, 15 }
+      { :a, :dot, :wicket, 1/30 },
+      { :b, :dot, :wicket, 1/15 },
+      { :d, :wicket, :dot, 1/30 },
+      { :f, :wicket, :dot, 1/15 }
     ]
   end
 
@@ -149,10 +152,10 @@ defmodule Jofra.Charts do
     # for swing bowlers, better swing makes dots become wickets
     # for medium-old(?) balls
         [
-          { :a, :dot, :wicket, 1, 30 },
-          { :b, :dot, :wicket, 1, 15 },
-          { :d, :wicket, :dot, 1, 30 },
-          { :f, :wicket, :dot, 1, 15 }
+          { :a, :dot, :wicket, 1/30 },
+          { :b, :dot, :wicket, 1/15 },
+          { :d, :wicket, :dot, 1/30 },
+          { :f, :wicket, :dot, 1/15 }
         ]
   end
 
@@ -160,10 +163,10 @@ defmodule Jofra.Charts do
     # for seam bowlers, better seam makes dots become wickets
     # for newer balls
             [
-              { :a, :dot, :wicket, 1, 30 },
-              { :b, :dot, :wicket, 1, 15 },
-              { :d, :wicket, :dot, 1, 30 },
-              { :f, :wicket, :dot, 1, 15 }
+              { :a, :dot, :wicket, 1/30 },
+              { :b, :dot, :wicket, 1/15 },
+              { :d, :wicket, :dot, 1/30 },
+              { :f, :wicket, :dot, 1/15 }
             ]
   end
 

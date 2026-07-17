@@ -50,6 +50,7 @@ defmodule Jofra.Utils do
         swing: :c,
         seam: :f
       },
+      day: 4,
       outcome: :dot,
       ball_age: 52
     }
