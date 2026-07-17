@@ -36,6 +36,7 @@ defmodule Jofra.Utils do
     %{
       controller: :batsman,
       batsman: %{
+        id: :bob,
         tendency: :moderate,
         shot_selection: :a,
         shot_quality: :a,
@@ -43,6 +44,7 @@ defmodule Jofra.Utils do
         batting_endurance: :b
       },
       bowler: %{
+        id: :bumrah,
         type: :spin,
         line: :c,
         length: :b,
@@ -52,6 +54,8 @@ defmodule Jofra.Utils do
       },
       day: 4,
       ball_age: 52,
+      inning: 1,
+      over: 52,
       match_clock: ~U[2026-06-01 09:00:00Z],
       session_start: ~U[2026-06-01 09:00:00Z],
       session_config: %{

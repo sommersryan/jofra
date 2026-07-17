@@ -21,8 +21,8 @@ defmodule Jofra.Charts do
     |> Enum.reduce([value], fn current_chart, acc ->
          [ curr | _ ] = acc
          chart_to_use = get_chart(current_chart, curr, context)
-         IO.inspect(current_chart)
-         IO.inspect(chart_to_use)
+#         IO.inspect(current_chart)
+#         IO.inspect(chart_to_use)
          [ roll_on_chart(curr, chart_to_use) | acc ]
        end)
     |> hd()
@@ -66,7 +66,7 @@ defmodule Jofra.Charts do
     { :d, :four, :double, 1/25 },
     { :d, :four, :single, 1/40 },
     { :f, :four, :double, 1/15 },
-    { :f, :four, :single, 1/20 }
+    { :f, :four, :single, 1/15 }
    ]
   end
 

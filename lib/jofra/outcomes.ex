@@ -10,6 +10,15 @@ defmodule Jofra.Outcomes do
     |> add_wicket_type()
     |> add_clock(match_clock)
     |> mark_illegal_delivery()
+    |> add_hit_location()
+    |> hydrate_context(context)
+    |> IO.inspect
+  end
+
+  def hydrate_context(outcome, context) do
+    outcome
+    |> Map.put(:batsman, context.batsman.id)
+    |> Map.put(:bowler, context.bowler.id)
   end
 
   def apply_outcome_charts(outcome, context) do
@@ -52,6 +61,13 @@ defmodule Jofra.Outcomes do
 
   def add_wicket_type(outcome) do
     outcome
+  end
+
+  def add_hit_location(%{ result: result } = outcome) when result in [:dot, :wicket], do: outcome
+
+  def add_hit_location(outcome) do
+    outcome
+    |> Map.put(:hit_location, select_from_counts(:hit_locations))
   end
 
   def select_from_counts(event_type, event_list \\ [], chances \\ 1000) do

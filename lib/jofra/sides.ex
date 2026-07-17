@@ -29,22 +29,47 @@ defmodule Jofra.Sides do
   end
 
   defp set_batsmen(state, side) do
+    { current, remaining } = Map.get(state, side) |> Enum.split(2)
+
     state
-    |> Map.put(:batsmen, Map.get(state, side))
+    |> Map.put(:batsmen, current)
+    |> Map.put(:next_in, remaining)
     |> Map.put(:batting_side, side)
   end
 
   @impl true
-  def handle_call(:next_batsman, _from, %{ batsmen: [] } = state) do
+  def handle_call({ :wicket, _ }, _from, %{ next_in: [] } = state) do
     { :reply, :innings_break, state }
   end
 
   @impl true
-  def handle_call(:next_batsman, _from, state) do
-    [ next_batsman | batsmen ] = Map.get(state, :batsmen)
+  def handle_call({ :wicket, on_strike }, _from, state) do
+    [ next_in | remaining ] = Map.get(state, :next_in)
 
-    { :reply, next_batsman, Map.put(state, :batsmen, batsmen )}
+    batsmen = case on_strike do
+      true ->
+        [ _ | not_out ] = state |> Map.get(:batsmen)
+        [ next_in, not_out ]
+      false ->
+        [ not_out | _ ] = state |> Map.get(:batsmen)
+        [ not_out, next_in ]
+    end
+
+    { :reply, batsmen, state |> Map.put(:batsmen, batsmen) |> Map.put(:next_in, remaining) }
   end
+
+  @impl true
+  def handle_call(:switch_strike, _from, state) do
+    new = state |> Map.get(:batsmen) |> Enum.reverse
+    { :reply, new, state |> Map.put(:batsmen, new) }
+  end
+
+#  @impl true
+#  def handle_call(:next_batsman, _from, state) do
+#    [ next_batsman | batsmen ] = Map.get(state, :batsmen)
+#
+#    { :reply, next_batsman, Map.put(state, :batsmen, batsmen )}
+#  end
 
   @impl true
   def handle_call(:bowlers, _from, state) do
@@ -83,8 +108,16 @@ defmodule Jofra.Sides do
     GenServer.start_link(__MODULE__, sides, name: __MODULE__)
   end
 
-  def next_batsman() do
-    GenServer.call(__MODULE__, :next_batsman)
+#  def next_batsman() do
+#    GenServer.call(__MODULE__, :next_batsman)
+#  end
+
+  def wicket(on_strike) do
+    GenServer.call(__MODULE__, { :wicket, on_strike })
+  end
+
+  def switch_strike() do
+    GenServer.call(__MODULE__, :switch_strike)
   end
 
   def bowlers() do

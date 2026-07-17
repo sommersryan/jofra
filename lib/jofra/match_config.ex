@@ -23,6 +23,21 @@ defmodule Jofra.MatchConfig do
         run_out: 30,
         stumped: 17
       },
+      hit_locations: %{
+        cover: 220,
+        extra_cover: 20,
+        mid_wicket: 120,
+        mid_on: 85,
+        point: 150,
+        backward_point: 40,
+        mid_off: 120,
+        square_leg: 100,
+        fine_leg: 20,
+        slips: 80,
+        gully: 10,
+        keeper: 10,
+        third_man: 25
+      },
       overs_limit: nil,
       days: 5,
       day_start: ~T[09:00:00],
