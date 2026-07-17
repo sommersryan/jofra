@@ -15,12 +15,12 @@ defmodule Jofra.Charts do
     :seam
   ] end
 
-  def apply_charts(%{ controller: controller, outcome: outcome } = context) do
+  def apply_charts(value, %{ controller: controller } = context) do
     controller
     |> charts_for
-    |> Enum.reduce([outcome], fn current_chart, acc ->
+    |> Enum.reduce([value], fn current_chart, acc ->
          [ curr | _ ] = acc
-         chart_to_use = get_chart(current_chart, Map.put(context, :outcome, curr))
+         chart_to_use = get_chart(current_chart, curr, context)
          IO.inspect(current_chart)
          IO.inspect(chart_to_use)
          [ roll_on_chart(curr, chart_to_use) | acc ]
@@ -28,21 +28,20 @@ defmodule Jofra.Charts do
     |> hd()
   end
 
-  def get_chart(chart, %{
-    controller: controller,
-    outcome: outcome
+  def get_chart(chart, value, %{
+    controller: controller
   } = context) do
     player_rating = Map.get(context, controller) |> Map.get(chart)
 
     chart(chart, context)
     |> Enum.filter(fn { rating, _, _, _ } -> rating == player_rating end)
-    |> Enum.filter(fn { _, chart_outcome, _, _ } -> chart_outcome == outcome end)
+    |> Enum.filter(fn { _, chart_value, _, _ } -> chart_value == value end)
   end
 
-  def roll_on_chart(outcome, outcome_chart) do
+  def roll_on_chart(value, value_chart) do
     roll = :rand.uniform()
 
-    result = Enum.reduce_while(outcome_chart, 0.0, fn { _, _, event, prob }, acc_prob ->
+    result = Enum.reduce_while(value_chart, 0.0, fn { _, _, event, prob }, acc_prob ->
         next_boundary = acc_prob + prob
 
         cond do
@@ -53,8 +52,8 @@ defmodule Jofra.Charts do
     )
 
     case result do
-      { :selected, new_outcome } -> new_outcome
-      _acc -> outcome
+      { :selected, new_value } -> new_value
+      _acc -> value
     end
   end
 

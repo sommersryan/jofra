@@ -51,8 +51,14 @@ defmodule Jofra.Utils do
         seam: :f
       },
       day: 4,
-      outcome: :dot,
-      ball_age: 52
+      ball_age: 52,
+      match_clock: ~U[2026-06-01 09:00:00Z],
+      session_start: ~U[2026-06-01 09:00:00Z],
+      session_config: %{
+        name: "Morning",
+        end_name: "Lunch",
+        hours: 2
+      }
     }
   end
 

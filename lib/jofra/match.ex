@@ -1,7 +1,7 @@
 defmodule Jofra.Match do
   import Jofra.Outcomes
 
-  def build_session(overs, session_config, session_start) do
+  def build_session(overs, %{ session_config: session_config, session_start: session_start } = context) do
     new_clock = case Enum.at(overs, 0) do
       nil -> session_start
       val -> val
@@ -12,8 +12,8 @@ defmodule Jofra.Match do
     case is_completed_session?(session_start, session_config, new_clock) do
       true -> overs |> Enum.reverse()
       false ->
-        over = build_over([], new_clock)
-        [ over | overs ] |> build_session(session_config, session_start)
+        over = build_over([], Map.put(context, :match_clock, new_clock))
+        [ over | overs ] |> build_session(context)
     end
   end
   
@@ -24,13 +24,13 @@ defmodule Jofra.Match do
     DateTime.after?(match_clock, session_end)
   end
 
-  def build_over(over, match_clock) do
+  def build_over(over, context) do
     case is_completed_over?(over) do
       true -> over |> Enum.reverse()
       false ->
-        outcome = build_outcome(match_clock)
+        outcome = build_outcome(context)
         new_clock = Map.get(outcome, :timestamp_end)
-        [ outcome | over ] |> build_over(new_clock)
+        [ outcome | over ] |> build_over(Map.put(context, :match_clock, new_clock))
     end
   end
 

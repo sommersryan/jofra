@@ -1,13 +1,22 @@
 defmodule Jofra.Outcomes do
   import Jofra.MatchConfig
+  import Jofra.Charts
 
-  def build_outcome(match_clock) do
+  def build_outcome(%{ match_clock: match_clock } = context) do
     %{}
     |> Map.put(:result, select_from_counts(:outcomes))
     |> add_extra()
+    |> apply_outcome_charts(context)
     |> add_wicket_type()
     |> add_clock(match_clock)
     |> mark_illegal_delivery()
+  end
+
+  def apply_outcome_charts(outcome, context) do
+    outcome
+    |> Map.get(:result)
+    |> apply_charts(context)
+    |> then(fn new -> Map.put(outcome, :result, new) end)
   end
 
   def add_clock(outcome, match_clock) do
@@ -39,6 +48,10 @@ defmodule Jofra.Outcomes do
   def add_wicket_type(%{ result: :wicket } = outcome) do
     outcome
     |> Map.put(:wicket_type, select_from_counts(:wickets))
+  end
+
+  def add_wicket_type(outcome) do
+    outcome
   end
 
   def select_from_counts(event_type, event_list \\ [], chances \\ 1000) do
