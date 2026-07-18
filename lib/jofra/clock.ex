@@ -33,7 +33,7 @@ defmodule Jofra.Clock do
       true -> :session_ended
       false -> :session_ongoing
     end
-    { :reply, result, state }
+    { :reply, { result, current }, state }
   end
 
   defp get_duration(event) do

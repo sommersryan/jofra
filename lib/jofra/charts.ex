@@ -21,8 +21,6 @@ defmodule Jofra.Charts do
     |> Enum.reduce([value], fn current_chart, acc ->
          [ curr | _ ] = acc
          chart_to_use = get_chart(current_chart, curr, context)
-#         IO.inspect(current_chart)
-#         IO.inspect(chart_to_use)
          [ roll_on_chart(curr, chart_to_use) | acc ]
        end)
     |> hd()
@@ -31,7 +29,10 @@ defmodule Jofra.Charts do
   def get_chart(chart, value, %{
     controller: controller
   } = context) do
-    player_rating = Map.get(context, controller) |> Map.get(chart)
+    player_rating = case controller do
+      :bowler -> Map.get(context, :bowler) |> Map.get(chart)
+      :batsman -> Map.get(context, :batsmen) |> hd() |> Map.get(chart)
+    end
 
     chart(chart, context)
     |> Enum.filter(fn { rating, _, _, _ } -> rating == player_rating end)
@@ -136,7 +137,7 @@ defmodule Jofra.Charts do
     ]
   end
 
-  def chart(:spin, %{ ball_age: ball_age, bowler: %{ type: :spin } }) when ball_age > 40 do
+  def chart(:spin, %{ ball_age: ball_age, bowler: %{ bowler_type: :spin } }) when ball_age > 40 do
     # for spin bowlers, better spin makes dots become wickets
     # for older balls
     [
@@ -147,7 +148,7 @@ defmodule Jofra.Charts do
     ]
   end
 
-  def chart(:swing, %{ ball_age: ball_age, bowler: %{ type: :swing } }) when ball_age > 20 do
+  def chart(:swing, %{ ball_age: ball_age, bowler: %{ bowler_type: :swing } }) when ball_age > 20 do
     # for swing bowlers, better swing makes dots become wickets
     # for medium-old(?) balls
         [
@@ -158,7 +159,7 @@ defmodule Jofra.Charts do
         ]
   end
 
-  def chart(:seam, %{ ball_age: ball_age, bowler: %{ type: :seam } }) when ball_age < 20 do
+  def chart(:seam, %{ ball_age: ball_age, bowler: %{ bowler_type: :seam } }) when ball_age < 20 do
     # for seam bowlers, better seam makes dots become wickets
     # for newer balls
             [

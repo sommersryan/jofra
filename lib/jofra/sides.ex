@@ -55,13 +55,29 @@ defmodule Jofra.Sides do
         [ not_out, next_in ]
     end
 
-    { :reply, batsmen, state |> Map.put(:batsmen, batsmen) |> Map.put(:next_in, remaining) }
+    {
+      :reply,
+      { :wicket, batsmen },
+      state |> Map.put(:batsmen, batsmen) |> Map.put(:next_in, remaining)
+    }
   end
 
   @impl true
-  def handle_call(:switch_strike, _from, state) do
+  def handle_call({ :rotate_strike, result }, _from, state) when result in [ :single, :triple ] do
     new = state |> Map.get(:batsmen) |> Enum.reverse
     { :reply, new, state |> Map.put(:batsmen, new) }
+  end
+
+  @impl true
+  def handle_call({ :rotate_strike, _ }, _from, state) do
+    { :reply, Map.get(state, :batsmen), state }
+  end
+
+  @impl true
+  def handle_call({ :new_over }, _from, state) do
+    new_batsmen = state |> Map.get(:batsmen) |> Enum.reverse
+    bowler = state |> Map.get(:bowlers) |> hd() #TODO bowler selection logic
+    { :reply, { new_batsmen, bowler }, state}
   end
 
   @impl true
@@ -105,8 +121,12 @@ defmodule Jofra.Sides do
     GenServer.call(__MODULE__, { :wicket, on_strike })
   end
 
-  def switch_strike() do
-    GenServer.call(__MODULE__, :switch_strike)
+  def rotate_strike(result) do
+    GenServer.call(__MODULE__, { :rotate_strike, result })
+  end
+
+  def new_over() do
+    GenServer.call(__MODULE__, { :new_over })
   end
 
   def bowlers() do

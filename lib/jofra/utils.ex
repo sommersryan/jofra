@@ -45,7 +45,8 @@ defmodule Jofra.Utils do
       },
       bowler: %{
         id: :bumrah,
-        type: :spin,
+        bowler_type: :spin,
+        bowling_endurance: :b,
         line: :c,
         length: :b,
         spin: :a,
@@ -56,8 +57,6 @@ defmodule Jofra.Utils do
       ball_age: 52,
       inning: 1,
       over: 52,
-      match_clock: ~U[2026-06-01 09:00:00Z],
-      session_start: ~U[2026-06-01 09:00:00Z],
       session_config: %{
         name: "Morning",
         end_name: "Lunch",
@@ -72,7 +71,7 @@ defmodule Jofra.Utils do
         [
           %{
             id: :john,
-            can_bowl: false
+            can_bowl: false,
           },
           %{
             id: :paul,

@@ -1,43 +1,69 @@
 defmodule Jofra.Match do
   import Jofra.Outcomes
 
-  def build_session(overs, %{ session_config: session_config, session_start: session_start } = context) do
-    new_clock = case Enum.at(overs, 0) do
-      nil -> session_start
-      val -> val
-        |> Enum.at(-1)
-        |> Map.get(:timestamp_end)
+  def build_session(overs, context) do
+    with { :session_ongoing, current_time } <- Jofra.Clock.session_check(),
+         # TODO: need to somehow check her if last ball in previous over rotated strike
+         # TODO: or if last ball in previous over was a wicket
+         # TODO: or if last ball was innings change
+         { batsmen, bowler } <- Jofra.Sides.new_over()
+    do
+      context = context
+        |> Map.put(:batsmen, batsmen)
+        |> Map.put(:bowler, bowler)
+
+      { over, new_context } = build_over([], context)
+
+      build_session([ over | overs ], new_context)
+    else
+      { :session_ended, current_time } ->
+        %{
+          overs: overs |> Enum.reverse,
+          started: Map.get(context, :session_start),
+          ended: current_time
+        }
     end
-    
-    case is_completed_session?(session_start, session_config, new_clock) do
-      true -> overs |> Enum.reverse()
-      false ->
-        over = build_over([], Map.put(context, :match_clock, new_clock))
-        [ over | overs ] |> build_session(context)
-    end
-  end
-  
-  defp is_completed_session?(session_start, session_config, match_clock) do
-    session_end = session_start 
-      |> DateTime.add(Map.get(session_config, :hours), :hour)
-    
-    DateTime.after?(match_clock, session_end)
   end
 
   def build_over(over, context) do
-    case is_completed_over?(over) do
-      true -> over |> Enum.reverse()
-      false ->
-        outcome = build_outcome(context)
-        new_clock = Map.get(outcome, :timestamp_end)
-        [ outcome | over ] |> build_over(Map.put(context, :match_clock, new_clock))
+    with :no_wicket <- wicket_check(over |> Enum.at(0)),
+         :over_ongoing <- over_check(over),
+         new_batsmen <- Jofra.Sides.rotate_strike(over |> Enum.at(0) |> Map.get(:result))
+    do
+      context = Map.put(context, :batsmen, new_batsmen)
+      { outcome, new_context } = build_outcome(context)
+      [ outcome | over ] |> build_over(new_context)
+    else
+      { :wicket, new_batsmen } ->
+        new_time = Jofra.Clock.advance(:new_batsman)
+        context = context |> Map.put(:batsmen, new_batsmen)
+        build_over([ %{ event: :new_batsman, timestamp: new_time } | over ], context)
+      :innings_break ->
+        new_time = Jofra.Clock.advance(:innings_break)
+        { [ %{ event: :innings_end, timestamp: new_time } | over ] |> Enum.reverse(), context }
+      :over_ended ->
+        { over |> Enum.reverse(), context }
     end
   end
 
-  defp is_completed_over?(over) do
-    over
+  defp wicket_check(%{ result: :wicket, wicket_type: type }) do
+    non_striker = type == :run_out && Enum.random([true, false])
+    Jofra.Sides.wicket(!non_striker)
+  end
+
+  defp wicket_check(_) do
+    :no_wicket
+  end
+
+  defp over_check(over) do
+    length = over
+    |> Enum.filter(fn o -> Map.has_key?(o, :result) end)
     |> Enum.reject(fn o -> Map.get(o, :illegal_delivery) == true end)
     |> Enum.count()
-    |> then(&(&1 == 6))
+
+    case length == 6 do
+      true -> :over_ended
+      false -> :over_ongoing
+    end
   end
 end
