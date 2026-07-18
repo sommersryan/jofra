@@ -64,13 +64,6 @@ defmodule Jofra.Sides do
     { :reply, new, state |> Map.put(:batsmen, new) }
   end
 
-#  @impl true
-#  def handle_call(:next_batsman, _from, state) do
-#    [ next_batsman | batsmen ] = Map.get(state, :batsmen)
-#
-#    { :reply, next_batsman, Map.put(state, :batsmen, batsmen )}
-#  end
-
   @impl true
   def handle_call(:bowlers, _from, state) do
     { :reply, Map.get(state, :bowlers), state }
@@ -107,10 +100,6 @@ defmodule Jofra.Sides do
   def start_link(sides) do
     GenServer.start_link(__MODULE__, sides, name: __MODULE__)
   end
-
-#  def next_batsman() do
-#    GenServer.call(__MODULE__, :next_batsman)
-#  end
 
   def wicket(on_strike) do
     GenServer.call(__MODULE__, { :wicket, on_strike })
