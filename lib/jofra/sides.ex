@@ -2,10 +2,10 @@ defmodule Jofra.Sides do
   use GenServer
 
   @impl true
-  def init({ orders, init_batting, init_bowling }) do
+  def init({ home_side, visiting_side, init_batting, init_bowling }) do
     state = %{}
-      |> Map.put(:home, Enum.at(orders, 0))
-      |> Map.put(:visitors, Enum.at(orders, 1))
+      |> Map.put(:home, home_side)
+      |> Map.put(:visitors, visiting_side)
       |> set_bowlers(init_bowling)
       |> set_batsmen(init_batting)
 
@@ -14,8 +14,8 @@ defmodule Jofra.Sides do
 
   defp set_bowlers(state, side) do
     bowlers = Map.get(state, side)
-    |> Enum.filter(&(&1.can_bowl))
-    |> Enum.sort_by(&(&1.bowling_priority || 99), :asc)
+    |> Enum.filter(&(Map.has_key?(&1, :can_bowl)))
+    |> Enum.sort_by(&(Map.get(&1, :bowling_priority) || 99), :asc)
     |> Enum.with_index()
     |> Enum.map(fn
       { bowler, idx } when idx < 2 -> Map.put(bowler, :on_spell, true)

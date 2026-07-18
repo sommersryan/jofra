@@ -1,4 +1,6 @@
 defmodule Jofra.Utils do
+  import Jofra.PlayerCreation
+
   def summarize_session(session) do
     results = session
     |> Map.get(:overs)
@@ -65,114 +67,27 @@ defmodule Jofra.Utils do
     }
   end
 
+  def build_test_side do
+    []
+    |> then(&([ player() |> as_batsman(:opening) | &1 ]))
+    |> then(&([ player() |> as_batsman(:opening) | &1 ]))
+    |> then(&([ player() |> as_batsman(:middle) | &1 ]))
+    |> then(&([ player() |> as_batsman(:middle) | &1 ]))
+    |> then(&([ player() |> as_batsman(:middle) | &1 ]))
+    |> then(&([ player() |> as_batsman(:lower) | &1 ]))
+    |> then(&([ player() |> as_batsman(:lower) |> as_bowler(:moderate) |> with_bowling_tendency(:swing) | &1 ]))
+    |> then(&([ player() |> as_batsman(:lower) |> as_bowler(:moderate) |> with_bowling_tendency(:spin) | &1 ]))
+    |> then(&([ player() |> as_batsman(:bowler) |> as_bowler(:great) |> with_bowling_tendency(:seam) | &1 ]))
+    |> then(&([ player() |> as_batsman(:bowler) |> as_bowler(:great) |> with_bowling_tendency(:seam) | &1 ]))
+    |> Enum.reverse
+  end
+
   def test_sides do
     {
-      [
-        [
-          %{
-            id: :john,
-            can_bowl: false,
-          },
-          %{
-            id: :paul,
-            can_bowl: false
-          },
-          %{
-            id: :george,
-            can_bowl: false
-          },
-          %{
-            id: :ringo,
-            can_bowl: false
-          },
-          %{
-            id: :jonny,
-            can_bowl: false
-          },
-          %{
-            id: :thom,
-            can_bowl: false
-          },
-          %{
-            id: :phil,
-            can_bowl: true,
-            bowling_priority: 5
-          },
-          %{
-            id: :colin,
-            can_bowl: true,
-            bowling_priority: 3
-          },
-          %{
-            id: :brian,
-            can_bowl: true,
-            bowling_priority: 4
-          },
-         %{
-            id: :clover,
-            can_bowl: true,
-            bowling_priority: 2
-          },
-          %{
-            id: :wren,
-            can_bowl: true,
-            bowling_priority: 1
-          },
-        ],
-               [
-                  %{
-                    id: :michelangelo,
-                    can_bowl: false
-                  },
-                  %{
-                    id: :leonardo,
-                    can_bowl: false
-                  },
-                  %{
-                    id: :raphael,
-                    can_bowl: false
-                  },
-                  %{
-                    id: :donatello,
-                    can_bowl: false
-                  },
-                  %{
-                    id: :bart,
-                    can_bowl: false
-                  },
-                  %{
-                    id: :marge,
-                    can_bowl: false
-                  },
-                  %{
-                    id: :homer,
-                    can_bowl: true,
-                    bowling_priority: 2
-                  },
-                  %{
-                    id: :lisa,
-                    can_bowl: true,
-                    bowling_priority: 5
-                  },
-                  %{
-                    id: :maggie,
-                    can_bowl: true,
-                    bowling_priority: 1
-                  },
-                 %{
-                    id: :burns,
-                    can_bowl: true,
-                    bowling_priority: 4
-                  },
-                  %{
-                    id: :smithers,
-                    can_bowl: true,
-                    bowling_priority: 3
-                  },
-                ]
-        ],
-        :home,
-        :visitors
+      build_test_side(),
+      build_test_side(),
+      :home,
+      :visitors
     }
   end
 end
