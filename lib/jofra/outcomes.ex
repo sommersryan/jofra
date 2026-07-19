@@ -25,7 +25,7 @@ defmodule Jofra.Outcomes do
   def apply_outcome_charts(outcome, context) do
     outcome
     |> Map.get(:result)
-    |> apply_charts(context)
+    |> apply_charts(context |> Map.put(:controller, Enum.random([:bowler, :batsman])))
     |> then(fn new -> Map.put(outcome, :result, new) end)
   end
 

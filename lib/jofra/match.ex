@@ -1,6 +1,19 @@
 defmodule Jofra.Match do
   import Jofra.Outcomes
 
+  def build_match do
+    Jofra.Match.build_session([], init_match_context())
+  end
+
+  def init_match_context do
+    %{
+      day: 1,
+      ball_age: 0,
+      inning: 1,
+      over: 0
+    }
+  end
+
   def build_session(overs, context) do
     with { :session_ongoing, current_time } <- Jofra.Clock.session_check(),
          # TODO: need to somehow check her if last ball in previous over rotated strike
@@ -28,7 +41,7 @@ defmodule Jofra.Match do
   def build_over(over, context) do
     with :no_wicket <- wicket_check(over |> Enum.at(0)),
          :over_ongoing <- over_check(over),
-         new_batsmen <- Jofra.Sides.rotate_strike(over |> Enum.at(0) |> Map.get(:result))
+         new_batsmen <- Jofra.Sides.rotate_strike(over |> Enum.at(0) |> then(fn x -> x[:result] end))
     do
       context = Map.put(context, :batsmen, new_batsmen)
       { outcome, new_context } = build_outcome(context)

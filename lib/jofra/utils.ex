@@ -9,17 +9,21 @@ defmodule Jofra.Utils do
     %{}
     |> Map.put(:runs, runs_in_overs(results))
     |> Map.put(:wickets, wickets_in_overs(results))
-    |> Map.put(:extras, Enum.reject(results, &(&1.extra == nil))
+    |> Map.put(:extras,
+        Enum.filter(results, &(Map.has_key?(&1, :extra)))
+        |> Enum.reject(&(&1.extra == nil))
         |> Enum.frequencies_by(&(&1.extra)))
   end
 
   def runs_in_overs(results) do
     results
+    |> Enum.filter(fn res -> Map.has_key?(res, :result) end)
     |> Enum.sum_by(fn res -> runs_for_result(res.result) end)
   end
 
   def wickets_in_overs(results) do
     results
+    |> Enum.filter(fn res -> Map.has_key?(res, :result) end)
     |> Enum.count(fn o -> o.result == :wicket end)
   end
 
