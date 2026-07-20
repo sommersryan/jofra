@@ -15,10 +15,10 @@ defmodule Jofra.Match do
   end
 
   def build_session(overs, context) do
-    with { :session_ongoing, current_time } <- Jofra.Clock.session_check(),
-         # TODO: need to somehow check her if last ball in previous over rotated strike
-         # TODO: or if last ball in previous over was a wicket
-         # TODO: or if last ball was innings change
+    with { :session_ongoing, _ } <- Jofra.Clock.session_check(),
+         last_ball <- get_last_ball(overs),
+         :no_wicket <- wicket_check(last_ball),
+         _ <- Jofra.Sides.rotate_strike(last_ball |> then(fn x -> x[:result] end)), # feels gross
          { batsmen, bowler } <- Jofra.Sides.new_over()
     do
       context = context
@@ -29,6 +29,17 @@ defmodule Jofra.Match do
 
       build_session([ over | overs ], new_context)
     else
+      { :wicket, new_batsmen } ->
+        new_time = Jofra.Clock.advance(:new_batsman)
+        [ prev | tail ] = overs
+        context = context |> Map.put(:batsmen, new_batsmen)
+        build_session([ prev ++ [%{ event: :last_ball_wicket, timestamp: new_time }] | tail ], context)
+      :innings_break ->
+        new_time = Jofra.Clock.advance(:innings_break)
+        { new_batsmen, new_bowler } = Jofra.Sides.change_sides()
+        [ prev | tail ] = overs
+        context = context |> Map.put(:batsmen, new_batsmen) |> Map.put(:bowler, new_bowler)
+        build_session([ prev ++ [%{ event: :last_ball_innings, timestamp: new_time }] | tail], context)
       { :session_ended, current_time } ->
         %{
           overs: overs |> Enum.reverse,
@@ -36,6 +47,14 @@ defmodule Jofra.Match do
           ended: current_time
         }
     end
+  end
+
+  def get_last_ball([]) do
+    nil
+  end
+
+  def get_last_ball(overs) do
+    overs |> hd() |> Enum.at(-1)
   end
 
   def build_over(over, context) do

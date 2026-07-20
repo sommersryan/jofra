@@ -76,9 +76,25 @@ defmodule Jofra.Sides do
   @impl true
   def handle_call({ :new_over }, _from, state) do
     new_batsmen = state |> Map.get(:batsmen) |> Enum.reverse
-    bowler = state |> Map.get(:bowlers) |> hd() #TODO bowler selection logic
-    { :reply, { new_batsmen, bowler }, state}
+    bowler = state |> Map.get(:bowlers) |> Enum.random #TODO bowler selection logic
+    { :reply, { new_batsmen, bowler }, state
+      |> Map.put(:batsmen, new_batsmen)
+      |> Map.put(:bowler, bowler)}
   end
+
+    @impl true
+    def handle_call({:change_sides}, _from, state) do
+      {batting_side, bowling_side} = case state.batting_side do
+        :home -> { :visitors, :home }
+        :visitors -> { :home, :visitors }
+      end
+
+      state
+      |> set_batsmen(batting_side)
+      |> set_bowlers(bowling_side)
+
+      { :reply, { Map.get(state, :batsmen), Map.get(state, :bowlers) |> Enum.random() },  state }
+    end
 
   @impl true
   def handle_call(:bowlers, _from, state) do
@@ -97,20 +113,6 @@ defmodule Jofra.Sides do
     end)
 
     { :noreply, Map.put(state, :bowlers, updated_bowlers) }
-  end
-
-  @impl true
-  def handle_cast({:change_sides}, state) do
-    {batting_side, bowling_side} = case state.batting_side do
-      :home -> { :visitors, :home }
-      :visitors -> { :home, :visitors }
-    end
-
-    state
-    |> set_batsmen(batting_side)
-    |> set_bowlers(bowling_side)
-
-    { :noreply, state }
   end
 
   def start_link(sides) do
