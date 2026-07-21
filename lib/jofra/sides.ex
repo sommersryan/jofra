@@ -82,20 +82,6 @@ defmodule Jofra.Sides do
       |> Map.put(:bowler, bowler)}
   end
 
-    @impl true
-    def handle_call({:change_sides}, _from, state) do
-      {batting_side, bowling_side} = case state.batting_side do
-        :home -> { :visitors, :home }
-        :visitors -> { :home, :visitors }
-      end
-
-      state
-      |> set_batsmen(batting_side)
-      |> set_bowlers(bowling_side)
-
-      { :reply, { Map.get(state, :batsmen), Map.get(state, :bowlers) |> Enum.random() },  state }
-    end
-
   @impl true
   def handle_call(:bowlers, _from, state) do
     { :reply, Map.get(state, :bowlers), state }
@@ -113,6 +99,20 @@ defmodule Jofra.Sides do
     end)
 
     { :noreply, Map.put(state, :bowlers, updated_bowlers) }
+  end
+
+  @impl true
+  def handle_call(:new_innings, _from, state) do
+    {batting_side, bowling_side} = case state.batting_side do
+      :home -> { :visitors, :home }
+      :visitors -> { :home, :visitors }
+    end
+
+    state = state
+    |> set_batsmen(batting_side)
+    |> set_bowlers(bowling_side)
+
+    { :reply, { Map.get(state, :batsmen), Map.get(state, :bowlers) |> Enum.random }, state}
   end
 
   def start_link(sides) do
@@ -135,11 +135,11 @@ defmodule Jofra.Sides do
     GenServer.call(__MODULE__, :bowlers)
   end
 
-  def over_bowled(bowler_id, timestamp) do
-    GenServer.cast(__MODULE__, { :over_bowled, bowler_id, timestamp })
+  def new_innings() do
+    GenServer.call(__MODULE__, :new_innings)
   end
 
-  def change_sides() do
-    GenServer.cast(__MODULE__, { :change_sides })
+  def over_bowled(bowler_id, timestamp) do
+    GenServer.cast(__MODULE__, { :over_bowled, bowler_id, timestamp })
   end
 end
