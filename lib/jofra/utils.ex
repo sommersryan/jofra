@@ -38,39 +38,6 @@ defmodule Jofra.Utils do
     end
   end
 
-  def test_context do
-    %{
-      controller: :batsman,
-      batsman: %{
-        id: :bob,
-        tendency: :moderate,
-        shot_selection: :a,
-        shot_quality: :a,
-        shot_precision: :b,
-        batting_endurance: :b
-      },
-      bowler: %{
-        id: :bumrah,
-        bowler_type: :spin,
-        bowling_endurance: :b,
-        line: :c,
-        length: :b,
-        spin: :a,
-        swing: :c,
-        seam: :f
-      },
-      day: 4,
-      ball_age: 52,
-      inning: 1,
-      over: 52,
-      session_config: %{
-        name: "Morning",
-        end_name: "Lunch",
-        hours: 2
-      }
-    }
-  end
-
   def build_test_side do
     []
     |> then(&([ player() |> as_batsman(:opening) | &1 ]))

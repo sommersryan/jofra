@@ -2,37 +2,37 @@ defmodule Jofra.Outcomes do
   import Jofra.MatchConfig
   import Jofra.Charts
 
-  def build_outcome(context) do
-    outcome = %{}
+  def build_outcome(batsmen, bowler, context) do
+    [ batsman, non_striker ] = batsmen
+
+    %{
+      batsman: batsman.id,
+      non_striker: non_striker.id,
+      bowler: bowler.id
+    }
     |> Map.put(:result, select_from_counts(:outcomes))
     |> add_extra()
-    |> apply_outcome_charts(context)
+    |> apply_outcome_charts(batsman, bowler, context)
     |> add_wicket_type()
     |> add_clock()
     |> mark_illegal_delivery()
     |> add_hit_location()
-    |> hydrate_context(context)
-
-    { outcome, context }
   end
 
-  def hydrate_context(outcome, context) do
-    outcome
-    |> Map.put(:batsman, context |> Map.get(:batsmen) |> hd() |> Map.get(:id))
-    |> Map.put(:bowler, context |> Map.get(:bowler) |> Map.get(:id))
-  end
-
-  def apply_outcome_charts(outcome, context) do
+  def apply_outcome_charts(outcome, batsman, bowler, context) do
     outcome
     |> Map.get(:result)
-    |> apply_charts(context |> Map.put(:controller, Enum.random([:bowler, :batsman])))
+    |> apply_charts(batsman, bowler, context)
     |> then(fn new -> Map.put(outcome, :result, new) end)
   end
 
   def add_clock(outcome) do
+    current_time = Jofra.Clock.current_time()
+    { end_time } = Jofra.Clock.advance(:delivery)
+
     outcome 
-    |> Map.put(:timestamp_start, Jofra.Clock.current_time())
-    |> Map.put(:timestamp_end, Jofra.Clock.advance(:delivery))
+    |> Map.put(:timestamp_start, current_time)
+    |> Map.put(:timestamp_end, end_time)
   end
 
   def add_extra(%{ result: :dot } = outcome) do

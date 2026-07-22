@@ -15,25 +15,22 @@ defmodule Jofra.Charts do
     :seam
   ] end
 
-  def apply_charts(value, %{ controller: controller } = context) do
+  def apply_charts(value, batsman, bowler, context) do
+    { controller, controlling_player } = [{ :batsman, batsman }, { :bowler, bowler }]
+      |> Enum.random
+
     controller
     |> charts_for
     |> Enum.reduce([value], fn current_chart, acc ->
          [ curr | _ ] = acc
-         chart_to_use = get_chart(current_chart, curr, context)
+         rating = Map.get(controlling_player, current_chart)
+         chart_to_use = get_chart(current_chart, curr, rating, context |> Map.put(controller, controlling_player))
          [ roll_on_chart(curr, chart_to_use) | acc ]
        end)
     |> hd()
   end
 
-  def get_chart(chart, value, %{
-    controller: controller
-  } = context) do
-    player_rating = case controller do
-      :bowler -> Map.get(context, :bowler) |> Map.get(chart)
-      :batsman -> Map.get(context, :batsmen) |> hd() |> Map.get(chart)
-    end
-
+  def get_chart(chart, value, player_rating, context) do
     chart(chart, context)
     |> Enum.filter(fn { rating, _, _, _ } -> rating == player_rating end)
     |> Enum.filter(fn { _, chart_value, _, _ } -> chart_value == value end)

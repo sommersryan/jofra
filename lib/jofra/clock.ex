@@ -12,9 +12,9 @@ defmodule Jofra.Clock do
   end
 
   @impl true
-  def handle_call({ :advance_clock, event }, _from, %{ current_time: current } = state) do
+  def handle_call({ :advance, event }, _from, %{ current_time: current } = state) do
     new_time = DateTime.shift(current, second: get_duration(event))
-    { :reply, new_time, state |> Map.put(:current_time, new_time) }
+    { :reply, { new_time }, state |> Map.put(:current_time, new_time) }
   end
 
   @impl true
@@ -30,16 +30,16 @@ defmodule Jofra.Clock do
   @impl true
   def handle_call(:session_check, _from, %{ current_time: current, session_end: end_ } = state) do
     result = case DateTime.after?(current, end_) do
-      true -> :session_ended
-      false -> :session_ongoing
+      true -> { :session_ended }
+      false -> { :ok }
     end
-    { :reply, { result, current }, state }
+    { :reply, result, state }
   end
 
   defp get_duration(event) do
     durations = case event do
         :delivery -> 30..40
-        :new_batsman -> 240..300
+        :wicket -> 240..300
         :innings_break -> 480..600
         :lunch -> 2400..2400
         :tea -> 1200..1200
@@ -61,7 +61,7 @@ defmodule Jofra.Clock do
   end
 
   def advance(event) do
-    GenServer.call(__MODULE__, { :advance_clock, event })
+    GenServer.call(__MODULE__, { :advance, event })
   end
 
   def session_check do
