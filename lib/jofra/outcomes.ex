@@ -2,7 +2,7 @@ defmodule Jofra.Outcomes do
   import Jofra.MatchConfig
   import Jofra.Charts
 
-  def build_outcome(batsmen, bowler, start_time, context) do
+  def build_outcome(batsmen, bowler, context) do
     [ batsman, non_striker ] = batsmen
 
     %{
@@ -27,9 +27,12 @@ defmodule Jofra.Outcomes do
   end
 
   def add_clock(outcome) do
+    current_time = Jofra.Clock.current_time()
+    { end_time } = Jofra.Clock.advance(:delivery)
+
     outcome 
-    |> Map.put(:timestamp_start, Jofra.Clock.current_time())
-    |> Map.put(:timestamp_end, Jofra.Clock.advance(:delivery))
+    |> Map.put(:timestamp_start, current_time)
+    |> Map.put(:timestamp_end, end_time)
   end
 
   def add_extra(%{ result: :dot } = outcome) do

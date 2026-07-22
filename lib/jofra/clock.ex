@@ -30,10 +30,10 @@ defmodule Jofra.Clock do
   @impl true
   def handle_call(:session_check, _from, %{ current_time: current, session_end: end_ } = state) do
     result = case DateTime.after?(current, end_) do
-      true -> :session_ended
-      false -> :session_ongoing
+      true -> { :session_ended }
+      false -> { :ok }
     end
-    { :reply, { result, current }, state }
+    { :reply, result, state }
   end
 
   defp get_duration(event) do

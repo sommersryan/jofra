@@ -24,7 +24,7 @@ defmodule Jofra.Charts do
     |> Enum.reduce([value], fn current_chart, acc ->
          [ curr | _ ] = acc
          rating = Map.get(controlling_player, current_chart)
-         chart_to_use = get_chart(current_chart, curr, rating, context)
+         chart_to_use = get_chart(current_chart, curr, rating, context |> Map.put(controller, controlling_player))
          [ roll_on_chart(curr, chart_to_use) | acc ]
        end)
     |> hd()

@@ -8,17 +8,7 @@ defmodule Jofra.Ball do
 
   @impl true
   def handle_call(:over_bowled, _from, %{ age: age }) do
-    { :reply, :ok, %{ age: age + 1 } }
-  end
-
-  @impl true
-  def handle_call(:current_age, _from, %{ age: age } = state) do
-    { :reply, age, state }
-  end
-
-  @impl true
-  def handle_call(:new_ball_check, _from, %{ age: age } = state) do
-    { :reply, age > 79, state }
+    { :reply, { :ok, age + 1, age + 1 > 79 }, %{ age: age + 1 } }
   end
 
   @impl true
@@ -32,14 +22,6 @@ defmodule Jofra.Ball do
 
   def over_bowled() do
     GenServer.call(__MODULE__, :over_bowled)
-  end
-
-  def age() do
-    GenServer.call(__MODULE__, :current_age)
-  end
-
-  def new_ball_possible?() do
-    GenServer.call(__MODULE__, :new_ball_check)
   end
 
   def new_ball() do
