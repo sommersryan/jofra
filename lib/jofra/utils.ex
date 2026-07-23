@@ -61,4 +61,25 @@ defmodule Jofra.Utils do
       :visitors
     }
   end
+
+    def test_day() do
+      %{ sessions: sessions } = Jofra.MatchConfig.get_match_config(:test)
+      start_time = ~U[2026-07-23T09:00:00Z]
+      Jofra.Ball.start_link(0)
+      Jofra.Clock.start_link(start_time, 2)
+      sides = Jofra.Utils.test_sides
+      { :ok, _ } = Jofra.Sides.start_link(sides)
+
+      Jofra.Match.play_day([], sessions, start_time, %{ ball_age: 0, day: 1})
+    end
+
+    def test_write_session(session) do
+      session |> Jason.encode! |> then(&File.write!("output.json", &1))
+    end
+
+    def test_kill_gens() do
+      GenServer.stop(Jofra.Ball)
+      GenServer.stop(Jofra.Clock)
+      GenServer.stop(Jofra.Sides)
+    end
 end

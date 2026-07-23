@@ -43,18 +43,18 @@ defmodule Jofra.MatchConfig do
       day_start: ~T[09:00:00],
       sessions: [
         %{
-          name: "Morning",
-          end_name: "Lunch",
+          name: :morning,
+          break: :lunch,
           hours: 2
         },
         %{
-          name: "Afternoon",
-          end_name: "Tea",
+          name: :afternoon,
+          break: :tea,
           hours: 2
         },
         %{
-          name: "Evening",
-          end_name: "Stumps",
+          name: :evening,
+          break: :stumps,
           hours: 2
         }
       ]

@@ -11,7 +11,7 @@ defmodule Jofra.Sides do
       |> Map.put(:home, home_side)
       |> Map.put(:visitors, visiting_side)
       |> Map.put(:innings, innings)
-      |> Map.put(:innings_remaining, innings_remaining)
+      |> Map.put(:remaining_innings, innings_remaining)
       |> set_bowlers(init_bowling)
       |> set_batsmen(init_batting)
 
@@ -101,6 +101,16 @@ defmodule Jofra.Sides do
   end
 
   @impl true
+  def handle_call(:bowler, _from, state) do
+    { :reply, get_bowler(state), state }
+  end
+
+  @impl true
+  def handle_call(:batsmen, _from, state) do
+    { :reply, Map.get(state, :batsmen), state }
+  end
+
+  @impl true
   def handle_call(:new_innings, _from, %{ remaining_innings: [], innings: innings }) do
     { completed_innings_side, completed_innings_number } = innings
 
@@ -186,6 +196,14 @@ defmodule Jofra.Sides do
 
   def bowlers() do
     GenServer.call(__MODULE__, :bowlers)
+  end
+
+  def bowler() do
+    GenServer.call(__MODULE__, :bowler)
+  end
+
+  def batsmen() do
+    GenServer.call(__MODULE__, :batsmen)
   end
 
   def new_innings() do

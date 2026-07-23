@@ -43,6 +43,7 @@ defmodule Jofra.Clock do
         :innings_break -> 480..600
         :lunch -> 2400..2400
         :tea -> 1200..1200
+        :stumps -> 0..0
     end
 
     Enum.random(durations)

@@ -6,31 +6,21 @@ defmodule Jofra.Match do
 #
 #  end
 #
-#  def play_day(sessions, innings, context) do
-#
-#  end
-  def test_session() do
-    start_time = DateTime.utc_now()
-    Jofra.Ball.start_link(0)
-    Jofra.Clock.start_link(start_time, 2)
-    sides = Jofra.Utils.test_sides
-    { :ok, side_state } = Jofra.Sides.start_link(sides)
-    batsmen = side_state |> Map.get(:batsmen)
-    bowler = side_state |> Map.get(:bowlers) |> Enum.random
-
-    Jofra.Match.play_session([], batsmen, bowler, start_time, [], %{ ball_age: 0, day: 1})
+  def play_day(sessions_completed, [], _, _) do
+    [%{ end_time: end_time } | _ ] = sessions_completed
+    %{ end_time: end_time, sessions: sessions_completed |> Enum.reverse }
   end
 
-  def test_write_session(session) do
-    session |> Jason.encode! |> then(&File.write!("output.json", &1))
-  end
+  def play_day(sessions_completed, sessions_to_play, current_time, context) do
+    [ %{ break: break, hours: hours } | remaining_sessions ] = sessions_to_play
+    :ok = Clock.new_session(current_time, hours)
+    batsmen = Sides.batsmen()
+    bowler = Sides.bowler()
 
-  def test_kill_gens() do
-    GenServer.stop(Jofra.Ball)
-    GenServer.stop(Jofra.Clock)
-    GenServer.stop(Jofra.Sides)
+    completed_session = play_session([], batsmen, bowler, current_time, [], context)
+    { new_time } = Clock.advance(break)
+    play_day([completed_session | sessions_completed], remaining_sessions, new_time, context)
   end
-
 
   def play_session(overs, batsmen, bowler, current_time, innings, context) do
     with { :ok } <- Clock.session_check()
@@ -91,7 +81,7 @@ defmodule Jofra.Match do
       { :ok, new_batsmen } ->
         { new_time } = Clock.advance(:wicket)
         { :ok, new_batsmen, new_time, context }
-      { :innings_break } -> { :innings_break }
+      :innings_break -> { :innings_break }
     end
   end
 
