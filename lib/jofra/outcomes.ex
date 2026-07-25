@@ -2,7 +2,7 @@ defmodule Jofra.Outcomes do
   import Jofra.MatchConfig
   import Jofra.Charts
 
-  def build_outcome(batsmen, bowler, context) do
+  def build_outcome(%{ batsmen: batsmen, bowler: bowler } = match) do
     [ batsman, non_striker ] = batsmen
 
     %{
@@ -12,27 +12,25 @@ defmodule Jofra.Outcomes do
     }
     |> Map.put(:result, select_from_counts(:outcomes))
     |> add_extra()
-    |> apply_outcome_charts(batsman, bowler, context)
+    |> apply_outcome_charts(batsman, bowler, match)
     |> add_wicket_type()
-    |> add_clock()
+    |> add_wicket_recipient()
     |> mark_illegal_delivery()
     |> add_hit_location()
+    |> add_context(match)
   end
 
-  def apply_outcome_charts(outcome, batsman, bowler, context) do
+  def add_context(outcome, match) do
+    match
+    |> Map.take([ :over, :innings, :day, :session, :current_time ])
+    |> then(fn c -> Map.merge(outcome, c) end)
+  end
+
+  def apply_outcome_charts(outcome, batsman, bowler, match) do
     outcome
     |> Map.get(:result)
-    |> apply_charts(batsman, bowler, context)
+    |> apply_charts(batsman, bowler, match)
     |> then(fn new -> Map.put(outcome, :result, new) end)
-  end
-
-  def add_clock(outcome) do
-    current_time = Jofra.Clock.current_time()
-    { end_time } = Jofra.Clock.advance(:delivery)
-
-    outcome 
-    |> Map.put(:timestamp_start, current_time)
-    |> Map.put(:timestamp_end, end_time)
   end
 
   def add_extra(%{ result: :dot } = outcome) do
@@ -48,7 +46,7 @@ defmodule Jofra.Outcomes do
   def mark_illegal_delivery(%{ extra: extra } = outcome) do
     case extra do
       extra when extra in [:no_ball, :wide] -> Map.put(outcome, :illegal_delivery, true)
-      _ -> outcome
+      _ -> Map.put(outcome, :illegal_delivery, false)
     end
   end
 
@@ -58,6 +56,20 @@ defmodule Jofra.Outcomes do
   end
 
   def add_wicket_type(outcome) do
+    outcome
+  end
+
+  def add_wicket_recipient(%{ result: :wicket, wicket_type: :run_out } = outcome) do
+    outcome
+    |> Map.put(:wicket_by, Enum.random([ :batsman, :non_striker ]))
+  end
+
+  def add_wicket_recipient(%{ result: :wicket } = outcome) do
+    outcome
+    |> Map.put(:wicket_by, :batsman)
+  end
+
+  def add_wicket_recipient(outcome) do
     outcome
   end
 
