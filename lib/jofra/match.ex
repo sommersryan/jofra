@@ -25,7 +25,7 @@ def init_match(home, visitors, toss_winners, toss_choice) do
     home: home,
     visitors: visitors,
     complete: false,
-    scores: [%{ side: :home, runs: 0, wickets: 0 }] # current innings goes at the head, update every iteration. may not need the *_to_win properties
+    scores: [%{ side: :home, runs: 0, wickets: 0 }]
                 # sum could just be a group by
   }
   |> Sides.build_sides()
@@ -39,6 +39,8 @@ def play_match(match) do
   match
   |> add_ball()
   |> update_over()
+  |> new_ball()
+  |> update_scores()
   |> handle_wicket()
   |> rotate_strike()
   |> change_ends()
@@ -56,15 +58,50 @@ def add_ball(%{ balls: balls } = match) do
   |> Map.put(:balls, [ build_outcome(match) | balls ])
 end
 
-def update_over(%{ balls: balls, innings: innings, over: over } = match) do
+def update_scores(%{ balls: [ %{ result: :wicket } = last_ball | prev_balls ],
+    scores: [ %{ wickets: wickets } = current_scores | previous ]} = match) do
+  new_score = Map.put(current_scores, :wickets, wickets + 1)
+  updated_balls = [ last_ball |> Map.put(:scores, new_score) | prev_balls ]
+  new_scores = [ new_score | previous ]
+
+  match
+  |> Map.put(:scores, new_scores)
+  |> Map.put(:balls, updated_balls)
+end
+
+def update_scores(%{ balls: [ %{ result: result } = last_ball | prev_balls ],
+    scores: [ %{ runs: runs } = current_scores | previous ]} = match) do
+  new_score = Map.put(current_scores, :runs, runs + Jofra.Utils.runs_for_result(result))
+  updated_balls = [ last_ball |> Map.put(:scores, new_score) | prev_balls ]
+  new_scores = [ new_score | previous ]
+
+  match
+  |> Map.put(:scores, new_scores)
+  |> Map.put(:balls, updated_balls)
+end
+
+def update_scores(match) do
+  match
+end
+
+def update_over(%{ balls: balls, innings: innings, over: over, ball_age: ball_age } = match) do
   balls_in_over = balls
   |> query_balls([ innings: innings, over: over, illegal_delivery: false ])
   |> Enum.count
 
   case balls_in_over do
-    6 -> Map.put(match, :over, over + 1)
+    6 -> Map.put(match, :over, over + 1) |> Map.put(:ball_age, ball_age + 1)
     _ -> match
   end
+end
+
+def new_ball(%{ ball_age: ball_age } = match) when ball_age > 80 do
+  match
+  |> Map.put(:ball_age, 0) #TODO: new ball logic
+end
+
+def new_ball(match) do
+  match
 end
 
 def rotate_strike(%{ balls: [ %{ result: last_result } | _ ], batsmen: batsmen } = match)
@@ -97,7 +134,9 @@ end
 
 def handle_wicket(match), do: match
 
-def change_innings(%{ balls: [ %{ result: :wicket } | _ ], next_in: [] } = match) do
+def change_innings(%{ balls: [ %{ result: :wicket } | _ ], scores: [ %{ wickets: wickets } | _ ] } = match)
+  when wickets == 10
+do
   Sides.new_innings(match)
 end
 

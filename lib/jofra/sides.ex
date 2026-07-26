@@ -57,7 +57,7 @@ defmodule Jofra.Sides do
     |> Map.put(:complete, true)
   end
 
-  def new_innings(%{ innings: innings, batting_side: batting_side } = match) do
+  def new_innings(%{ innings: innings, batting_side: batting_side, scores: scores } = match) do
     bowlers = match
     |> Map.get(batting_side)
     |> Enum.filter(&(&1[:can_bowl]))
@@ -65,10 +65,13 @@ defmodule Jofra.Sides do
     [ batsman, non_striker | next_in ] = Map.get(match, other_side(batting_side))
 
     match
+    |> Map.put(:batting_side, other_side(batting_side))
     |> Map.put(:innings, innings + 1)
     |> Map.put(:bowlers, bowlers)
     |> select_bowler()
     |> Map.put(:batsmen, [ batsman, non_striker ])
     |> Map.put(:next_in, next_in)
+    |> Map.put(:over, 0)
+    |> Map.put(:scores, [ %{ side: other_side(batting_side), wickets: 0, runs: 0 } | scores ])
   end
 end

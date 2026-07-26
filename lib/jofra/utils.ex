@@ -46,6 +46,7 @@ defmodule Jofra.Utils do
     |> then(&([ player() |> as_batsman(:middle) | &1 ]))
     |> then(&([ player() |> as_batsman(:middle) | &1 ]))
     |> then(&([ player() |> as_batsman(:lower) | &1 ]))
+    |> then(&([ player() |> as_batsman(:lower) | &1 ]))
     |> then(&([ player() |> as_batsman(:lower) |> as_bowler(:moderate) |> with_bowling_tendency(:swing) | &1 ]))
     |> then(&([ player() |> as_batsman(:lower) |> as_bowler(:moderate) |> with_bowling_tendency(:spin) | &1 ]))
     |> then(&([ player() |> as_batsman(:bowler) |> as_bowler(:great) |> with_bowling_tendency(:seam) | &1 ]))
@@ -60,6 +61,17 @@ defmodule Jofra.Utils do
       :home,
       :visitors
     }
+  end
+
+  def test_match do
+    home = build_test_side()
+    visitors = build_test_side()
+    match = Jofra.Match.init_match(home, visitors, :home, :bat)
+    Jofra.Match.play_match(match)
+  end
+
+  def debug_match do
+    test_match() |> then(fn _x -> nil end)
   end
 
     def test_write_match(match) do
