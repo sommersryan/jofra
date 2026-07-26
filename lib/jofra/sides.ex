@@ -50,6 +50,7 @@ defmodule Jofra.Sides do
     match
     |> Map.put(:next_in, remaining)
     |> Map.put(:batsmen, new_batsmen)
+    |> Map.put(:partnership, 0)
   end
 
   def new_innings(%{ innings: 4 } = match) do
@@ -72,6 +73,38 @@ defmodule Jofra.Sides do
     |> Map.put(:batsmen, [ batsman, non_striker ])
     |> Map.put(:next_in, next_in)
     |> Map.put(:over, 0)
+    |> Map.put(:partnership, 0)
     |> Map.put(:scores, [ %{ side: other_side(batting_side), wickets: 0, runs: 0 } | scores ])
+  end
+
+  def declare(%{ scores: [current_score | prev ]} = match) do
+    new_score = Map.put(current_score, :declared, true)
+
+    match
+    |> Map.put(:scores, [ new_score | prev ])
+    |> new_innings()
+  end
+
+  def check_declaration(%{ innings: 3, follow_on: false, difference: difference } = match)
+    when difference > 430
+  do
+    match
+    |> declare()
+  end
+
+  def check_declaration(%{ innings: 3, over: over, follow_on: false, day: 5, difference: difference} = match)
+    when difference > 300 and over > 5
+  do
+    match
+    |> declare()
+  end
+
+  def check_declaration(%{ innings: 1, difference: difference } = match) when difference > 550 do
+    match
+    |> declare()
+  end
+
+  def check_declaration(match) do
+    match
   end
 end

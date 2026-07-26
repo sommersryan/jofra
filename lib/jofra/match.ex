@@ -12,11 +12,10 @@ defmodule Jofra.Match do
         session_start_time: ~U[2026-07-25T09:00:00Z],
         match_start_time: ~U[2026-07-25T09:00:00Z],
         session_duration: 2,
+        partnership: 0,
         balls: [],
         over: 0,
         ball_age: 0,
-        runs_to_win: nil,
-        wickets_to_win: nil,
         follow_on: false,
         innings: 1,
         home: home,
@@ -28,6 +27,7 @@ defmodule Jofra.Match do
     end
 
     def play_match(%{ complete: true } = match) do
+      IO.inspect(match[:scores], label: "MATCH COMPLETE")
       match
     end
 
@@ -41,10 +41,12 @@ defmodule Jofra.Match do
       |> rotate_strike()
       |> change_ends()
       |> change_innings()
+      |> Sides.check_declaration()
       |> Clock.advance()
       #need to update bowler usage in here somewhere
       |> Clock.update_session()
       |> Sides.select_bowler()
+      |> Scores.check_victory()
       |> play_match()
     end
 
