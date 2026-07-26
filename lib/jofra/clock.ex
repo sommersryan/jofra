@@ -1,41 +1,4 @@
 defmodule Jofra.Clock do
-  use GenServer
-
-  @impl true
-  def init({ start_time, duration }) do
-    { :ok, init_session(start_time, duration) }
-  end
-
-  defp init_session(start_time, duration) do
-    end_ = DateTime.shift(start_time, hour: duration)
-    %{ session_start: start_time, current_time: start_time, session_end: end_ }
-  end
-
-  @impl true
-  def handle_call({ :advance, event }, _from, %{ current_time: current } = state) do
-    new_time = DateTime.shift(current, second: get_duration(event))
-    { :reply, { new_time }, state |> Map.put(:current_time, new_time) }
-  end
-
-  @impl true
-  def handle_call({ :new_session, start_time, duration }, _from, _state) do
-    { :reply, :ok, init_session(start_time, duration) }
-  end
-
-  @impl true
-  def handle_call(:current_time, _from, %{ current_time: current_time } = state) do
-    { :reply, current_time, state }
-  end
-
-  @impl true
-  def handle_call(:session_check, _from, %{ current_time: current, session_end: end_ } = state) do
-    result = case DateTime.after?(current, end_) do
-      true -> { :session_ended }
-      false -> { :ok }
-    end
-    { :reply, result, state }
-  end
-
   defp get_duration(event) do
     durations = case event do
         :delivery -> 30..40
@@ -43,29 +6,70 @@ defmodule Jofra.Clock do
         :innings_break -> 480..600
         :lunch -> 2400..2400
         :tea -> 1200..1200
-        :stumps -> 0..0
     end
 
     Enum.random(durations)
   end
 
-  def start_link(start_time, duration) do
-    GenServer.start_link(__MODULE__, { start_time, duration }, name: __MODULE__)
+  defp get_break(:morning), do: :lunch
+  defp get_break(:afternoon), do: :tea
+  defp get_break(:evening), do: :stumps
+
+  defp get_next(:morning), do: :afternoon
+  defp get_next(:afternoon), do: :evening
+  defp get_next(:evening), do: :morning
+
+  defp advance_by(%{ day: day, match_start_time: match_start } = match, :stumps) do
+    new_time = DateTime.shift(match_start, day: day)
+
+    match
+    |> Map.put(:current_time, new_time)
+    |> Map.put(:day, day + 1)
   end
 
-  def current_time() do
-    GenServer.call(__MODULE__, :current_time)
+  defp advance_by(%{ current_time: current_time } = match, event) do
+    match
+    |> Map.put(:current_time, DateTime.shift(current_time, second: get_duration(event)))
   end
 
-  def new_session(start_time, duration) do
-    GenServer.call(__MODULE__, { :new_session, start_time, duration })
+  def advance(%{ innings: innings, balls: [%{ innings: last_ball_innings } | _]} = match)
+  when innings > last_ball_innings do
+    match
+    |> advance_by(:innings_break)
   end
 
-  def advance(event) do
-    GenServer.call(__MODULE__, { :advance, event })
+  def advance(%{ balls: [ %{ result: :wicket } ] } = match) do
+    match
+    |> advance_by(:wicket)
   end
 
-  def session_check do
-    GenServer.call(__MODULE__, :session_check)
+  def advance(match) do
+    match
+    |> advance_by(:delivery)
+  end
+
+  def update_session(%{ over: over, balls: [ %{ over: last_ball_over } | _ ],
+    current_time: current_time, session_start_time: session_start_time, session: session } = match)
+    when over > last_ball_over
+  do
+    session_end = DateTime.shift(session_start_time, hour: 2)
+    case DateTime.after?(current_time, session_end) do
+      true ->
+        match
+        |> advance_by(get_break(session))
+        |> Map.put(:session, get_next(session))
+        |> set_session_start_time()
+      false ->
+        match
+    end
+  end
+
+  def update_session(match) do
+    match
+  end
+
+  def set_session_start_time(%{ current_time: current } = match) do
+    match
+    |> Map.put(:session_start_time, current)
   end
 end

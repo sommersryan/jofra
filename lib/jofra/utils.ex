@@ -46,6 +46,7 @@ defmodule Jofra.Utils do
     |> then(&([ player() |> as_batsman(:middle) | &1 ]))
     |> then(&([ player() |> as_batsman(:middle) | &1 ]))
     |> then(&([ player() |> as_batsman(:lower) | &1 ]))
+    |> then(&([ player() |> as_batsman(:lower) | &1 ]))
     |> then(&([ player() |> as_batsman(:lower) |> as_bowler(:moderate) |> with_bowling_tendency(:swing) | &1 ]))
     |> then(&([ player() |> as_batsman(:lower) |> as_bowler(:moderate) |> with_bowling_tendency(:spin) | &1 ]))
     |> then(&([ player() |> as_batsman(:bowler) |> as_bowler(:great) |> with_bowling_tendency(:seam) | &1 ]))
@@ -62,24 +63,18 @@ defmodule Jofra.Utils do
     }
   end
 
-    def test_day() do
-      %{ sessions: sessions } = Jofra.MatchConfig.get_match_config(:test)
-      start_time = ~U[2026-07-23T09:00:00Z]
-      Jofra.Ball.start_link(0)
-      Jofra.Clock.start_link(start_time, 2)
-      sides = Jofra.Utils.test_sides
-      { :ok, _ } = Jofra.Sides.start_link(sides)
+  def test_match do
+    home = build_test_side()
+    visitors = build_test_side()
+    match = Jofra.Match.init_match(home, visitors, :home, :bat)
+    Jofra.Match.play_match(match)
+  end
 
-      Jofra.Match.play_day([], sessions, start_time, %{ ball_age: 0, day: 1})
-    end
+  def debug_match do
+    test_match() |> then(fn _x -> nil end)
+  end
 
-    def test_write_session(session) do
-      session |> Jason.encode! |> then(&File.write!("output.json", &1))
-    end
-
-    def test_kill_gens() do
-      GenServer.stop(Jofra.Ball)
-      GenServer.stop(Jofra.Clock)
-      GenServer.stop(Jofra.Sides)
+    def test_write_match(match) do
+      match |> Jason.encode! |> then(&File.write!("output.json", &1))
     end
 end
