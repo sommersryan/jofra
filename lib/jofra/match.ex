@@ -28,6 +28,8 @@ defmodule Jofra.Match do
 
     def play_match(%{ complete: true } = match) do
       IO.inspect(match[:scores], label: "MATCH COMPLETE")
+      IO.inspect(match[:day], label: "ON DAY")
+      IO.inspect(match[:session], label: "SESSION")
       match
     end
 
@@ -44,6 +46,8 @@ defmodule Jofra.Match do
       |> Sides.check_declaration()
       |> Clock.advance()
       #need to update bowler usage in here somewhere
+      #now need 2nd innings declaration conditions
+      #and need a day 5 cutoff condition
       |> Clock.update_session()
       |> Sides.select_bowler()
       |> Scores.check_victory()

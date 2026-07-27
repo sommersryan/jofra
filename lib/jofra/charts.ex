@@ -57,9 +57,9 @@ defmodule Jofra.Charts do
 
   def chart(:shot_quality, _) do [
     # better quality - ones and twos become fours
-    { :a, :single, :four, 1/20 },
+    { :a, :single, :four, 1/18 },
     { :a, :double, :four, 1/5 },
-    { :b, :single, :four, 1/40 },
+    { :b, :single, :four, 1/38 },
     { :b, :double, :four, 1/25 },
     { :d, :four, :double, 1/25 },
     { :d, :four, :single, 1/40 },
@@ -72,7 +72,7 @@ defmodule Jofra.Charts do
     # better selection - wickets become dots
       { :a, :wicket, :dot, 1/10 },
       { :b, :wicket, :dot, 1/15 },
-      { :d, :dot, :wicket, 1/30 },
+      { :d, :dot, :wicket, 1/35 },
       { :f, :dot, :wicket, 1/20 }
     ]
   end
@@ -80,10 +80,10 @@ defmodule Jofra.Charts do
   def chart(:shot_precision, _) do
     [
     # better precision - dots become singles, doubles, boundaries
-      { :a, :dot, :single, 1/10 },
+      { :a, :dot, :single, 1/9 },
       { :a, :dot, :double, 1/20 },
       { :a, :dot, :four, 1/50 },
-      { :b, :dot, :single, 1/20 },
+      { :b, :dot, :single, 1/18 },
       { :b, :dot, :double, 1/30 },
       { :b, :dot, :four, 1/70 },
       { :d, :four, :dot, 1/20 },
@@ -107,7 +107,7 @@ defmodule Jofra.Charts do
   ]
   end
 
-  def chart(:batting_endurance, %{ day: day }) when day > 3 do
+  def chart(:batting_endurance, %{ day: day }) when day > 4 do
     [# with lower endurance, dots become wickets late in match
       { :d, :dot, :wicket, 1/30 },
       { :f, :dot, :wicket, 1/15 }
@@ -138,8 +138,8 @@ defmodule Jofra.Charts do
     # for spin bowlers, better spin makes dots become wickets
     # for older balls
     [
-      { :a, :dot, :wicket, 1/30 },
-      { :b, :dot, :wicket, 1/15 },
+      { :a, :dot, :wicket, 1/35 },
+      { :b, :dot, :wicket, 1/20 },
       { :d, :wicket, :dot, 1/30 },
       { :f, :wicket, :dot, 1/15 }
     ]

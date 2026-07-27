@@ -1,8 +1,8 @@
 defmodule Jofra.Clock do
   defp get_duration(event) do
     durations = case event do
-        :delivery -> 30..40
-        :wicket -> 240..300
+        :delivery -> 40..50
+        :wicket -> 245..305
         :innings_break -> 480..600
         :lunch -> 2400..2400
         :tea -> 1200..1200
@@ -48,12 +48,15 @@ defmodule Jofra.Clock do
     |> advance_by(:delivery)
   end
 
-  def update_session(%{ over: over, balls: [ %{ over: last_ball_over } | _ ],
+  def update_session(%{ over: over, day: day, balls: [ %{ over: last_ball_over } | _ ],
     current_time: current_time, session_start_time: session_start_time, session: session } = match)
     when over > last_ball_over
   do
     session_end = DateTime.shift(session_start_time, hour: 2)
     case DateTime.after?(current_time, session_end) do
+      true when session == :evening and day == 5 ->
+        match
+        |> Map.put(:complete, true)
       true ->
         match
         |> advance_by(get_break(session))

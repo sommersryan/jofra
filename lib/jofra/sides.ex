@@ -104,6 +104,11 @@ defmodule Jofra.Sides do
     |> declare()
   end
 
+  def check_declaration(%{ innings: 2, difference: difference } = match) when difference < -450 do
+    match
+    |> declare()
+  end
+
   def check_declaration(match) do
     match
   end
