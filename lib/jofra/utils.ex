@@ -27,6 +27,23 @@ defmodule Jofra.Utils do
     |> Enum.count(fn o -> o.result == :wicket end)
   end
 
+  def gpa(grades) do
+    num = grades
+    |> Enum.sum_by(fn x -> points_for_grade(x) end)
+
+    num / Enum.count(grades)
+  end
+
+  def points_for_grade(grade) do
+    case(grade) do
+      :a -> 4
+      :b -> 3
+      :c -> 2
+      :d -> 1
+      _ -> 0
+    end
+  end
+
   def runs_for_result(result) do
     case(result) do
       :single -> 1
