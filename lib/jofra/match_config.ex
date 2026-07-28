@@ -2,13 +2,13 @@ defmodule Jofra.MatchConfig do
   def get_match_config(:test) do
     %{
       outcomes: %{
-        dot: 731,
-        single: 183,
-        four: 45,
+        dot: 730,
+        single: 185,
+        four: 46,
         double: 32,
         triple: 3,
         six: 3,
-        wicket: 3
+        wicket: 1
       },
       extras: %{
         leg_bye: 5,

@@ -127,8 +127,8 @@ defmodule Jofra.Charts do
   def chart(:length, _) do
     # better length - dots become wickets
     [
-      { :a, :dot, :wicket, 1/30 },
-      { :b, :dot, :wicket, 1/15 },
+      { :a, :dot, :wicket, 1/35 },
+      { :b, :dot, :wicket, 1/20 },
       { :d, :wicket, :dot, 1/30 },
       { :f, :wicket, :dot, 1/15 }
     ]
@@ -138,8 +138,8 @@ defmodule Jofra.Charts do
     # for spin bowlers, better spin makes dots become wickets
     # for older balls
     [
-      { :a, :dot, :wicket, 1/35 },
-      { :b, :dot, :wicket, 1/20 },
+      { :a, :dot, :wicket, 1/40 },
+      { :b, :dot, :wicket, 1/25 },
       { :d, :wicket, :dot, 1/30 },
       { :f, :wicket, :dot, 1/15 }
     ]
@@ -149,8 +149,8 @@ defmodule Jofra.Charts do
     # for swing bowlers, better swing makes dots become wickets
     # for medium-old(?) balls
         [
-          { :a, :dot, :wicket, 1/30 },
-          { :b, :dot, :wicket, 1/15 },
+          { :a, :dot, :wicket, 1/35 },
+          { :b, :dot, :wicket, 1/20 },
           { :d, :wicket, :dot, 1/30 },
           { :f, :wicket, :dot, 1/15 }
         ]
@@ -160,8 +160,8 @@ defmodule Jofra.Charts do
     # for seam bowlers, better seam makes dots become wickets
     # for newer balls
             [
-              { :a, :dot, :wicket, 1/30 },
-              { :b, :dot, :wicket, 1/15 },
+              { :a, :dot, :wicket, 1/35 },
+              { :b, :dot, :wicket, 1/20 },
               { :d, :wicket, :dot, 1/30 },
               { :f, :wicket, :dot, 1/15 }
             ]
