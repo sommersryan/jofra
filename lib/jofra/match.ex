@@ -1,6 +1,6 @@
 defmodule Jofra.Match do
     import Jofra.Outcomes
-    alias Jofra.{ Clock, Sides, Scores }
+    alias Jofra.{ Clock, Sides, Scores, Bowlers }
 
     def init_match(home, visitors, toss_winners, toss_choice) do
       %{
@@ -28,6 +28,8 @@ defmodule Jofra.Match do
 
     def play_match(%{ complete: true } = match) do
       IO.inspect(match[:scores], label: "MATCH COMPLETE")
+      IO.inspect(match[:day], label: "ON DAY")
+      IO.inspect(match[:session], label: "SESSION")
       match
     end
 
@@ -43,9 +45,8 @@ defmodule Jofra.Match do
       |> change_innings()
       |> Sides.check_declaration()
       |> Clock.advance()
-      #need to update bowler usage in here somewhere
       |> Clock.update_session()
-      |> Sides.select_bowler()
+      |> Bowlers.new_bowler()
       |> Scores.check_victory()
       |> play_match()
     end
@@ -61,7 +62,9 @@ defmodule Jofra.Match do
       |> Enum.count
 
       case balls_in_over do
-        6 -> Map.put(match, :over, over + 1) |> Map.put(:ball_age, ball_age + 1)
+        6 ->
+          Map.put(match, :over, over + 1)
+          |> Map.put(:ball_age, ball_age + 1)
         _ -> match
       end
     end

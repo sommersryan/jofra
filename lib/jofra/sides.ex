@@ -1,4 +1,5 @@
 defmodule Jofra.Sides do
+  import Jofra.Bowlers
 
   def build_sides(%{ toss_winners: toss_winners, toss_choice: toss_choice } = match) do
     bowling_side = case toss_choice do
@@ -14,7 +15,8 @@ defmodule Jofra.Sides do
 
     match
     |> Map.put(:bowlers, bowlers)
-    |> select_bowler()
+    |> Map.put(:bowler_usage, new_bowler_usage(bowlers))
+    |> new_bowler()
     |> Map.put(:batsmen, [ batsman, non_striker ])
     |> Map.put(:batting_side, other_side(bowling_side))
     |> Map.put(:next_in, next_in)
@@ -26,16 +28,6 @@ defmodule Jofra.Sides do
 
   def other_side(:visitors) do
     :home
-  end
-
-  # TODO: bowler selection logic
-  def select_bowler(%{ bowlers: bowlers, balls: [ %{ bowler: last_bowler_id } | _ ] } = match) do
-    available = bowlers |> Enum.reject(fn b -> b.id == last_bowler_id end)
-    Map.put(match, :bowler, Enum.random(available))
-  end
-
-  def select_bowler(%{ bowlers: bowlers } = match) do
-    Map.put(match, :bowler, Enum.random(bowlers))
   end
 
   def new_batsman(%{ balls: [ %{ wicket_by: wicket_by } | _ ], next_in: next_in, batsmen: batsmen } = match) do
@@ -68,8 +60,10 @@ defmodule Jofra.Sides do
     match
     |> Map.put(:batting_side, other_side(batting_side))
     |> Map.put(:innings, innings + 1)
+    |> Map.put(:bowler_usage, bowlers
+              |> new_bowler_usage())
     |> Map.put(:bowlers, bowlers)
-    |> select_bowler()
+    |> new_bowler()
     |> Map.put(:batsmen, [ batsman, non_striker ])
     |> Map.put(:next_in, next_in)
     |> Map.put(:over, 0)
@@ -100,6 +94,11 @@ defmodule Jofra.Sides do
   end
 
   def check_declaration(%{ innings: 1, difference: difference } = match) when difference > 550 do
+    match
+    |> declare()
+  end
+
+  def check_declaration(%{ innings: 2, difference: difference } = match) when difference < -450 do
     match
     |> declare()
   end

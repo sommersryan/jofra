@@ -3,12 +3,12 @@ defmodule Jofra.MatchConfig do
     %{
       outcomes: %{
         dot: 730,
-        single: 180,
+        single: 185,
         four: 46,
-        double: 33,
-        triple: 4,
+        double: 32,
+        triple: 3,
         six: 3,
-        wicket: 4
+        wicket: 1
       },
       extras: %{
         leg_bye: 5,
