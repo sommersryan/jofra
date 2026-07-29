@@ -55,6 +55,7 @@ defmodule Jofra.Clock do
     session_end = DateTime.shift(session_start_time, hour: 2)
     case DateTime.after?(current_time, session_end) do
       true when session == :evening and day == 5 ->
+        IO.puts("MATCH TIME EXPIRED")
         match
         |> Map.put(:complete, true)
       true ->

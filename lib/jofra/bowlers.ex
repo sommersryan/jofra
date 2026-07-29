@@ -17,7 +17,6 @@ defmodule Jofra.Bowlers do
         |> Enum.map(fn b -> Map.put(b, :points, 0) end)
         |> Enum.map(fn b -> score_bowler(b, match, [ :spell, :rest, :overall, :spin, :swing, :seam, :econ, :wickets ]) end)
         |> Enum.sort_by(&(&1.points), :desc)
-        |> IO.inspect(label: "sorted bowlers by points")
         |> Enum.find(fn b -> b.overs_available > 0 end)
 
         match

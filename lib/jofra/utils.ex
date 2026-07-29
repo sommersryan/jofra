@@ -1,27 +1,43 @@
 defmodule Jofra.Utils do
   import Jofra.PlayerCreation
 
-  def summarize_session(session) do
-    results = session
-    |> Map.get(:overs)
-    |> Enum.flat_map(&(&1))
-
-    %{}
-    |> Map.put(:runs, runs_in_overs(results))
-    |> Map.put(:wickets, wickets_in_overs(results))
-    |> Map.put(:extras,
-        Enum.filter(results, &(Map.has_key?(&1, :extra)))
-        |> Enum.reject(&(&1.extra == nil))
-        |> Enum.frequencies_by(&(&1.extra)))
-  end
-
-  def summarize_bowling(match) do
+  def bowling_figures(match) do
     match
     |> Map.get(:balls)
-    |> Enum.group_by(fn b -> b.innings end)
-    |> Map.values
-    |> Enum.map(fn i -> Enum.frequencies_by(i, &(&1.bowler))
+    |> Enum.group_by(&{&1.innings, &1.bowler})
+    |> Enum.map(fn { {innings, bowler}, balls } ->
+    %{
+      innings: innings,
+      bowler: bowler,
+      runs: Enum.sum_by(balls, fn x -> Jofra.Utils.runs_for_result(x.result) end),
+      wickets: Enum.sum_by(balls, fn x -> if x.result == :wicket, do: 1, else: 0 end),
+      overs: Enum.count(balls) / 6
+    } |> then(&(Map.put(&1, :economy, &1.runs / &1.overs)))
     end)
+  end
+
+  def batsman_scores(match) do
+    match
+    |> Map.get(:balls)
+    |> Enum.group_by(&{&1.innings, &1.batsman})
+    |> Enum.map(fn { {innings, batsman}, balls} ->
+     %{
+       innings: innings,
+       batsman: batsman,
+       score: Enum.sum_by(balls, fn x -> Jofra.Utils.runs_for_result(x.result) end),
+       balls: Enum.count(balls),
+       dismissed: Enum.find(balls, fn x -> x.result == :wicket end) |> get_in([:current_time]),
+       how_out: Enum.find(balls, fn x -> x.result == :wicket end) |> get_in([:wicket_type]),
+       first_ball: Enum.min_by(balls, fn x -> DateTime.to_unix(x[:current_time]) end) |> get_in([:current_time])
+    } end)
+    |> Enum.sort_by(fn x -> x[:first_ball] end)
+  end
+
+  def write_match_summary(match) do
+    %{
+      batting: batsman_scores(match),
+      bowling: bowling_figures(match)
+    }
   end
 
   def runs_in_overs(results) do
@@ -101,6 +117,6 @@ defmodule Jofra.Utils do
   end
 
     def test_write_match(match) do
-      match |> Jason.encode! |> then(&File.write!("output.json", &1))
+      match |> Jason.encode!(pretty: true) |> then(&File.write!("output.json", &1))
     end
 end
