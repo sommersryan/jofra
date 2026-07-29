@@ -104,7 +104,7 @@ defmodule Jofra.Bowlers do
       0
     end
 
-    def new_bowler(%{ innings: 1, over: 0, balls: [] } = match) do
+    def new_bowler(%{ over: 0 } = match) do
       match
       |> select_bowler(nil)
     end

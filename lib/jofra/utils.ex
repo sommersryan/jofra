@@ -15,6 +15,15 @@ defmodule Jofra.Utils do
         |> Enum.frequencies_by(&(&1.extra)))
   end
 
+  def summarize_bowling(match) do
+    match
+    |> Map.get(:balls)
+    |> Enum.group_by(fn b -> b.innings end)
+    |> Map.values
+    |> Enum.map(fn i -> Enum.frequencies_by(i, &(&1.bowler))
+    end)
+  end
+
   def runs_in_overs(results) do
     results
     |> Enum.filter(fn res -> Map.has_key?(res, :result) end)

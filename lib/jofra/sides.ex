@@ -58,6 +58,9 @@ defmodule Jofra.Sides do
     [ batsman, non_striker | next_in ] = Map.get(match, other_side(batting_side))
 
     match
+    |> Map.put(:over, 0)
+    |> Map.put(:partnership, 0)
+    |> Map.put(:ball_age, 0)
     |> Map.put(:batting_side, other_side(batting_side))
     |> Map.put(:innings, innings + 1)
     |> Map.put(:bowler_usage, bowlers
@@ -66,8 +69,6 @@ defmodule Jofra.Sides do
     |> new_bowler()
     |> Map.put(:batsmen, [ batsman, non_striker ])
     |> Map.put(:next_in, next_in)
-    |> Map.put(:over, 0)
-    |> Map.put(:partnership, 0)
     |> Map.put(:scores, [ %{ side: other_side(batting_side), wickets: 0, runs: 0 } | scores ])
   end
 
