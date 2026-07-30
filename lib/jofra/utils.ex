@@ -1,9 +1,10 @@
 defmodule Jofra.Utils do
   import Jofra.PlayerCreation
 
-  def bowling_figures(match) do
+  def bowling_figures(match, at_time) do
     match
     |> Map.get(:balls)
+    |> Enum.filter(fn b -> DateTime.before?(b.current_time, at_time) end)
     |> Enum.group_by(&{&1.innings, &1.bowler})
     |> Enum.map(fn { {innings, bowler}, balls } ->
     %{
@@ -16,9 +17,10 @@ defmodule Jofra.Utils do
     end)
   end
 
-  def batsman_scores(match) do
+  def batsman_scores(match, at_time) do
     match
     |> Map.get(:balls)
+    |> Enum.filter(fn b -> DateTime.before?(b.current_time, at_time) end)
     |> Enum.group_by(&{&1.innings, &1.batsman})
     |> Enum.map(fn { {innings, batsman}, balls} ->
      %{
@@ -33,23 +35,11 @@ defmodule Jofra.Utils do
     |> Enum.sort_by(fn x -> x[:first_ball] end)
   end
 
-  def write_match_summary(match) do
+  def write_match_summary(match, at_time) do
     %{
-      batting: batsman_scores(match),
-      bowling: bowling_figures(match)
+      batting: batsman_scores(match, at_time),
+      bowling: bowling_figures(match, at_time)
     }
-  end
-
-  def runs_in_overs(results) do
-    results
-    |> Enum.filter(fn res -> Map.has_key?(res, :result) end)
-    |> Enum.sum_by(fn res -> runs_for_result(res.result) end)
-  end
-
-  def wickets_in_overs(results) do
-    results
-    |> Enum.filter(fn res -> Map.has_key?(res, :result) end)
-    |> Enum.count(fn o -> o.result == :wicket end)
   end
 
   def gpa(grades) do

@@ -120,7 +120,10 @@ defmodule Jofra.Charts do
   def chart(:line, _) do
     # better line - wides become dots, singles become dots
     [
-      # wait how do I do this
+      { :a, :single, :dot, 1/40 },
+      { :b, :single, :dot, 1/30 },
+      { :d, :dot, :single, 1/30 },
+      { :f, :dot, :single, 1/20 }
     ]
   end
 
