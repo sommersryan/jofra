@@ -20,6 +20,11 @@ if System.get_env("PHX_SERVER") do
   config :jofra, JofraWeb.Endpoint, server: true
 end
 
+
+config :jofra, :bsky_self,
+  app_password: System.get_env("JOFRA_BSKY_PASS"),
+  handle: System.get_env("JOFRA_BSKY_HANDLE")
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
