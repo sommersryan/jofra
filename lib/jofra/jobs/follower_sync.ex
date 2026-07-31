@@ -7,7 +7,7 @@ defmodule Jofra.Jobs.FollowerSync do
 
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
-      entries = followers
+      to_add = followers
         |> Enum.map(fn f -> %{
           id: Ecto.UUID.generate(),
           did: f["did"],
@@ -20,8 +20,8 @@ defmodule Jofra.Jobs.FollowerSync do
 
       Jofra.Repo.insert_all(
         Jofra.Accounts.User,
-        entries,
-        on_conflict: {:replace, [:handle, :updated_at]},
+        to_add,
+        on_conflict: {:replace, [:handle, :updated_at, :avatar, :display_name]},
         conflict_target: :did
       )
     else
