@@ -11,6 +11,7 @@ defmodule Jofra.Application do
       JofraWeb.Telemetry,
       Jofra.Repo,
       {DNSCluster, query: Application.get_env(:jofra, :dns_cluster_query) || :ignore},
+      {Oban, Application.fetch_env!(:jofra, Oban)},
       {Phoenix.PubSub, name: Jofra.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Jofra.Finch},

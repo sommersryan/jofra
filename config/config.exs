@@ -7,6 +7,12 @@
 # General application configuration
 import Config
 
+config :jofra, Oban,
+  engine: Oban.Engines.Basic,
+  notifier: Oban.Notifiers.Postgres,
+  queues: [default: 10],
+  repo: Jofra.Repo
+
 config :jofra,
   ecto_repos: [Jofra.Repo],
   generators: [timestamp_type: :utc_datetime]

@@ -6,6 +6,8 @@ defmodule Jofra.Repo.Migrations.CreateUsersAuthTables do
       add :id, :binary_id, primary_key: true
       add :handle, :string, null: false
       add :did, :string, null: false
+      add :avatar, :text
+      add :display_name, :text
       add :confirmed_at, :utc_datetime
 
       timestamps(type: :utc_datetime)

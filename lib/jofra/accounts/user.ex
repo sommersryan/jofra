@@ -7,6 +7,8 @@ defmodule Jofra.Accounts.User do
   schema "users" do
     field :did, :string
     field :handle, :string
+    field :avatar, :string
+    field :display_name, :string
     field :confirmed_at, :utc_datetime
 
     has_many :players, Jofra.Model.Player
