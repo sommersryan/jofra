@@ -24,11 +24,7 @@ config :jofra, JofraWeb.Endpoint,
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "EtAhgEtiTNCfLrTR9p8w7ovNWcJmmBFiQrjrptXLO8JWOFSed9dUKKkoj9C+IV21",
-  watchers: [
-    esbuild: {Esbuild, :install_and_run, [:jofra, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:jofra, ~w(--watch)]}
-  ]
+  secret_key_base: "EtAhgEtiTNCfLrTR9p8w7ovNWcJmmBFiQrjrptXLO8JWOFSed9dUKKkoj9C+IV21"
 
 # ## SSL Support
 #
@@ -52,16 +48,6 @@ config :jofra, JofraWeb.Endpoint,
 # If desired, both `http:` and `https:` keys can be
 # configured to run both http and https servers on
 # different ports.
-
-# Watch static and templates for browser reloading.
-config :jofra, JofraWeb.Endpoint,
-  live_reload: [
-    patterns: [
-      ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
-      ~r"priv/gettext/.*(po)$",
-      ~r"lib/jofra_web/(controllers|live|components)/.*(ex|heex)$"
-    ]
-  ]
 
 # Enable dev routes for dashboard and mailbox
 config :jofra, dev_routes: true
