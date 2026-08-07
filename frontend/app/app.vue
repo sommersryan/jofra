@@ -1,4 +1,6 @@
 <script setup>
+import LoginMenu from "~/components/LoginMenu.vue";
+
 useHead({
   meta: [
     { name: 'viewport', content: 'width=device-width, initial-scale=1' }
@@ -11,7 +13,7 @@ useHead({
   }
 })
 
-const title = 'jofra'
+const title = 'Jofra'
 const description = ''
 
 useSeoMeta({
@@ -28,24 +30,30 @@ useSeoMeta({
   <UApp>
     <UHeader>
       <template #left>
-        hi
+        <div class="text-5xl font-bold">
+          Jofra
+        </div>
+        <UIcon name="boxicons:cricket-ball" class="size-10"/>
       </template>
-
+      <AppMenu/>
       <template #right>
-        <UColorModeButton />
+        <div class="flex gap-x-4">
+          <LoginMenu/>
+          <UColorModeButton/>
+        </div>
       </template>
     </UHeader>
 
-    <UMain>
+    <UMain class="flex w-full text-center p-8">
       <NuxtPage />
     </UMain>
 
-    <USeparator icon="i-simple-icons-nuxtdotjs" />
+    <USeparator icon="i-arcticons-cricket" />
 
     <UFooter>
       <template #left>
-        <p class="text-sm text-muted">
-          Built with Nuxt UI • © {{ new Date().getFullYear() }}
+        <p class="text-sm dark:text-accent text-primary">
+          by @phylan
         </p>
       </template>
 
@@ -55,7 +63,7 @@ useSeoMeta({
           target="_blank"
           icon="i-simple-icons-github"
           aria-label="GitHub"
-          color="neutral"
+          class="text-primary dark:text-accent"
           variant="ghost"
         />
       </template>

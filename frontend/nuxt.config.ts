@@ -3,9 +3,9 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/eslint',
     '@nuxt/ui',
-    '@pinia/nuxt',
-    'dayjs-nuxt'
+    '@pinia/nuxt'
   ],
+
 
   devtools: {
     enabled: true
@@ -25,6 +25,12 @@ export default defineNuxtConfig({
         commaDangle: 'never',
         braceStyle: '1tbs'
       }
+    }
+  },
+
+  runtimeConfig: {
+    public: {
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE
     }
   }
 })

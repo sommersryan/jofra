@@ -1,5 +1,11 @@
+<script setup>
+  const runtimeConfig = useRuntimeConfig()
+
+
+</script>
+
 <template>
-  <div>
-    hi
+  <div class="flex w-full justify-center">
+    {{runtimeConfig.public}}
   </div>
 </template>

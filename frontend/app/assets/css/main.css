@@ -2,7 +2,7 @@
 @import "@nuxt/ui";
 
 @theme static {
-  --font-sans: 'Public Sans', sans-serif;
+  --font-sans: 'Bricolage Grotesque', sans-serif;
 
   --color-green-50: #EFFDF5;
   --color-green-100: #D9FBE8;
@@ -15,4 +15,64 @@
   --color-green-800: #016538;
   --color-green-900: #0A5331;
   --color-green-950: #052E16;
+
+  --color-martinique-50: #f8f7f6;
+  --color-martinique-100: #e6e9f3;
+  --color-martinique-200: #d3d9ea;
+  --color-martinique-300: #b5c0db;
+  --color-martinique-400: #92a0c8;
+  --color-martinique-500: #7884b9;
+  --color-martinique-600: #656dab;
+  --color-martinique-700: #5a5f9b;
+  --color-martinique-800: #4d4f80;
+  --color-martinique-900: #414467;
+  --color-martinique-950: #363751;
+
+  --color-cinnabar-50: #fef2f3;
+  --color-cinnabar-100: #fde3e5;
+  --color-cinnabar-200: #FCCCCF;
+  --color-cinnabar-300: #F9A8AD;
+  --color-cinnabar-400: #F3767D;
+  --color-cinnabar-500: #E63943;
+  --color-cinnabar-600: #d52d37;
+  --color-cinnabar-700: #b3222a;
+  --color-cinnabar-800: #942027;
+  --color-cinnabar-900: #7b2126;
+  --color-cinnabar-950: #430c0f;
+
+  --color-fire-bush-50: #fefbec;
+  --color-fire-bush-100: #fbf2ca;
+  --color-fire-bush-200: #f6e491;
+  --color-fire-bush-300: #f1d058;
+  --color-fire-bush-400: #edbd32;
+  --color-fire-bush-500: #e7a222;
+  --color-fire-bush-600: #cc7a13;
+  --color-fire-bush-700: #a95814;
+  --color-fire-bush-800: #8a4416;
+  --color-fire-bush-900: #713916;
+  --color-fire-bush-950: #411c07;
+
+  --color-pampas-50: #fbfaf8;
+  --color-pampas-100: #f8f7f6;
+  --color-pampas-200: #e9e2e3;
+  --color-pampas-300: #dacdce;
+  --color-pampas-400: #b09699;
+  --color-pampas-500: #826265;
+  --color-pampas-600: #5e4847;
+  --color-pampas-700: #4b3535;
+  --color-pampas-800: #2d2024;
+  --color-pampas-900: #201314;
+  --color-pampas-950: #0e0708;
+
+  --color-chateau-50: #f9fafb;
+  --color-chateau-100: #f3f4f6;
+  --color-chateau-200: #e6e7ea;
+  --color-chateau-300: #d2d5da;
+  --color-chateau-400: #999ea8;
+  --color-chateau-500: #6e727d;
+  --color-chateau-600: #4e5560;
+  --color-chateau-700: #3a414e;
+  --color-chateau-800: #222934;
+  --color-chateau-900: #141924;
+  --color-chateau-950: #050810;
 }

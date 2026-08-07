@@ -70,3 +70,5 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+config :jofra, :frontend_url, "http://127.0.0.1:3000/"

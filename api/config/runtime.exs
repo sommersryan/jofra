@@ -25,6 +25,13 @@ config :jofra, :bsky_self,
   app_password: System.get_env("JOFRA_BSKY_PASS"),
   handle: System.get_env("JOFRA_BSKY_HANDLE")
 
+ config :atex, Atex.OAuth,
+     base_url: System.get_env("JOFRA_OAUTH_BASE_URL"),
+     private_key: System.get_env("JOFRA_OAUTH_PRIVATE_KEY"),
+     key_id: System.get_env("JOFRA_OAUTH_KEY_ID"),
+     scopes: [],
+     is_localhost: config_env() == :dev
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

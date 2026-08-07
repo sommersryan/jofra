@@ -51,7 +51,8 @@ defmodule Jofra.MixProject do
       {:req, "~> 0.7.1"},
       {:oban, "~> 2.23"},
       {:igniter, "~> 0.5", only: [:dev]},
-      {:atex, "~> 0.10"}
+      {:atex, "~> 0.10"},
+      {:corsica, "~> 2.1.3"}
     ]
   end
 
