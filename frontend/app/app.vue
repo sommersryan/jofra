@@ -30,10 +30,12 @@ useSeoMeta({
   <UApp>
     <UHeader>
       <template #left>
-        <div class="text-5xl font-bold">
-          jofra
-        </div>
-        <UIcon name="boxicons:cricket-ball" class="size-10"/>
+        <NuxtLink to="/" class="flex gap-x-2 items-center">
+          <div class="text-5xl font-bold">
+            jofra
+          </div>
+          <UIcon name="boxicons:cricket-ball" class="size-10"/>
+        </NuxtLink>
       </template>
       <AppMenu/>
       <template #right>
@@ -44,7 +46,7 @@ useSeoMeta({
       </template>
     </UHeader>
 
-    <UMain class="flex w-full text-center p-8">
+    <UMain class="flex w-full p-8">
       <NuxtPage />
     </UMain>
 

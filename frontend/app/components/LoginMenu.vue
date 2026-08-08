@@ -10,7 +10,8 @@ const loginHandle = ref(null)
 const accountMenuItems = computed(() => [
   {
     label: 'Profile',
-    icon: 'gg:profile'
+    icon: 'gg:profile',
+    to: `/@${user.value.handle}`
   },
   {
     label: 'Logout',
@@ -19,6 +20,8 @@ const accountMenuItems = computed(() => [
 ])
 
 const { user, isLoggedIn } = useAuth()
+
+console.log(user)
 </script>
 
 <template>

@@ -3,12 +3,14 @@
     {
       label: 'Matches',
       icon: 'grommet-icons:scorecard',
-      class: 'text-2xl'
+      class: 'text-2xl',
+      to: '/matches'
     },
     {
       label: 'Players',
       icon: 'maki:cricket',
-      class: 'text-2xl'
+      class: 'text-2xl',
+      to: '/players'
     }
   ])
 </script>
