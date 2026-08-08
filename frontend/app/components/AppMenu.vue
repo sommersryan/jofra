@@ -2,11 +2,13 @@
   const items = computed(() => [
     {
       label: 'Matches',
-      icon: 'grommet-icons:scorecard'
+      icon: 'grommet-icons:scorecard',
+      class: 'text-2xl'
     },
     {
       label: 'Players',
-      icon: 'maki:cricket'
+      icon: 'maki:cricket',
+      class: 'text-2xl'
     }
   ])
 </script>
@@ -15,7 +17,6 @@
   <div class="flex w-full justify-center">
     <UNavigationMenu
       :items="items"
-      class="text-xl"
       color="primary"
       highlight
       highlight-color="primary"

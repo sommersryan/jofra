@@ -1,6 +1,5 @@
 <script setup lang="ts">
 const loginMenuOpen = ref(false)
-const runtimeConfig = useRuntimeConfig()
 
 const onLogin = () => {
   window.location.href = `http://127.0.0.1:4000/oauth/login?handle=${loginHandle.value}`
@@ -8,13 +7,27 @@ const onLogin = () => {
 
 const loginHandle = ref(null)
 
+const accountMenuItems = computed(() => [
+  {
+    label: 'Profile',
+    icon: 'gg:profile'
+  },
+  {
+    label: 'Logout',
+    icon: 'material-symbols:logout'
+  }
+])
+
 const { user, isLoggedIn } = useAuth()
 </script>
 
 <template>
-  <div v-if="isLoggedIn">
-    {{user.handle}}
-  </div>
+  <UDropdownMenu :items="accountMenuItems" v-if="isLoggedIn" :ui="{ content: 'w-48'}">
+    <div class="flex items-center gap-x-2 cursor-pointer hover:bg-info-100 transition-colors duration-200 dark:hover:bg-info-950 bg-elevated p-3 h-12 rounded-xl">
+      <UAvatar :src="user.avatar" size="md" class=""/>
+      <span class="text-md">@{{ user.handle }}</span>
+    </div>
+  </UDropdownMenu>
   <UPopover v-model:open="loginMenuOpen" v-else>
     <UButton variant="ghost" icon="fa6-brands:square-bluesky">
       Login

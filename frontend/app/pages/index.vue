@@ -6,6 +6,6 @@
 
 <template>
   <div class="flex w-full justify-center">
-    {{runtimeConfig.public}}
+
   </div>
 </template>

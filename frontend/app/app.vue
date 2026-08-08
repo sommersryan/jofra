@@ -31,7 +31,7 @@ useSeoMeta({
     <UHeader>
       <template #left>
         <div class="text-5xl font-bold">
-          Jofra
+          jofra
         </div>
         <UIcon name="boxicons:cricket-ball" class="size-10"/>
       </template>
